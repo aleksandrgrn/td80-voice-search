@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Activated (listening): dark tint on yellow background -->
+    <item android:state_activated="true" android:color="@color/voice_listening_tint" />
+    <!-- Default: white tint on dark background -->
+    <item android:color="@color/voice_idle_tint" />
+</selector>

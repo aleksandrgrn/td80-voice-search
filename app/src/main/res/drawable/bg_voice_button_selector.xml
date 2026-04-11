@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Activated + focused: yellow background with focus ring (D-pad on projector) -->
+    <item android:state_activated="true" android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/voice_listening" />
+            <corners android:radius="4dp" />
+            <stroke android:width="2dp" android:color="@color/focus_ring" />
+        </shape>
+    </item>
+    <!-- Activated (not focused): yellow background, no ring -->
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/voice_listening" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    <!-- Focused (not activated): dark background with focus ring -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/button_app_focused" />
+            <corners android:radius="4dp" />
+            <stroke android:width="2dp" android:color="@color/focus_ring" />
+        </shape>
+    </item>
+    <!-- Default: dark background, no ring -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/button_app_default" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+</selector>

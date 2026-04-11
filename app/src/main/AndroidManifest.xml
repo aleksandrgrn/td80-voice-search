@@ -21,9 +21,10 @@
         <activity
             android:name=".ui.SearchActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:screenOrientation="landscape"
             android:windowSoftInputMode="stateHidden"
-            android:configChanges="keyboard|keyboardHidden|navigation">
+            android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

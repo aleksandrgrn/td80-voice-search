@@ -11,3 +11,6 @@
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler
 -keep class com.voicesearch.service.AssistantService { *; }
+
+# SpeechRecognizer callback — prevent R8 from stripping/renaming
+-keep class * implements android.speech.RecognitionListener { *; }

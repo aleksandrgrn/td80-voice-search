@@ -19,6 +19,14 @@
     <string name="app_not_installed">не установлено</string>
     <string name="simulate_voice">Симулировать голос</string>
     <string name="voice_not_available">Голосовой поиск (недоступен)</string>
-    <string name="voice_search_future">Голосовой поиск будет доступен в следующей версии</string>
+    <string name="voice_listening_hint">Слушаю…</string>
+    <string name="voice_processing_hint">Обработка…</string>
+    <string name="voice_error_not_available">Голосовой поиск недоступен. Установите Speech Services by Google</string>
+    <string name="voice_error_network">Ошибка сети при голосовом поиске</string>
+    <string name="voice_error_no_match">Не удалось распознать речь. Попробуйте ещё раз</string>
+    <string name="voice_error_client">Ошибка клиента голосового поиска</string>
+    <string name="voice_error_speech_busy">Голосовой поиск занят, попробуйте позже</string>
+    <string name="voice_error_timeout">Речь не обнаружена. Попробуйте ещё раз</string>
+    <string name="voice_error_permission">Разрешение на микрофон не предоставлено</string>
     <string name="voice_search_no_mic_permission">Без разрешения на микрофон голосовой поиск недоступен</string>
 </resources>

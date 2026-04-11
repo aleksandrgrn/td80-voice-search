@@ -46,7 +46,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_mic"
-            android:background="@drawable/bg_app_button_selector"
+            android:background="@drawable/bg_voice_button_selector"
             android:contentDescription="@string/voice_search_button"
             android:scaleType="centerInside"
             android:padding="8dp"
