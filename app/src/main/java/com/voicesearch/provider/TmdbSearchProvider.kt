@@ -1,18 +1,153 @@
 package com.voicesearch.provider
 
+import android.util.Log
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.voicesearch.model.SearchResult
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
 
 class TmdbSearchProvider(
     private val apiKey: String,
-    private val language: String = "ru-RU"
+    private val language: String = "ru-RU",
+    private val baseUrl: String = "https://api.themoviedb.org/3/",
+    private val client: OkHttpClient = OkHttpClient(),
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : SearchProvider {
 
     override val id = "tmdb"
     override val displayName = "TMDB"
     override val type = ProviderType.CARDS
 
+    private val moshi: Moshi = Moshi.Builder()
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+
+    private val searchResponseAdapter = moshi.adapter(TmdbMultiSearchResponse::class.java)
+    private val genreListAdapter = moshi.adapter(TmdbGenreListResponse::class.java)
+
+    private val genreMutex = Mutex()
+    private var genreCache: Map<Int, String>? = null
+
     override suspend fun search(query: String): List<SearchResult> {
-        // TODO: implement TMDB API calls (task 6)
-        return emptyList()
+        if (apiKey.isBlank() || apiKey == "PLACEHOLDER" || apiKey == "PLACEHOLDER_GET_YOUR_KEY") {
+            Log.w(TAG, "TMDB API key is not configured — skipping search")
+            return emptyList()
+        }
+
+        val cache = ensureGenreCache()
+
+        val response = searchMulti(query)
+        val results = response.results
+            .mapNotNull { item -> TmdbMapper.mapResultItem(item, cache) }
+
+        Log.d(TAG, "TMDB search '$query' → ${results.size} results (API total: ${response.totalResults})")
+        return results
     }
+
+    private suspend fun ensureGenreCache(): Map<Int, String> {
+        genreCache?.let { return it }
+        return genreMutex.withLock {
+            genreCache ?: fetchGenres().also { genreCache = it }
+        }
+    }
+
+    private suspend fun fetchGenres(): Map<Int, String> {
+        val combined = mutableMapOf<Int, String>()
+        try {
+            fetchGenreList("movie").forEach { combined[it.id] = it.name }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch movie genre list", e)
+        }
+        try {
+            fetchGenreList("tv").forEach { combined[it.id] = it.name }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to fetch TV genre list", e)
+        }
+        if (combined.isNotEmpty()) {
+            Log.d(TAG, "Genre cache initialized: ${combined.size} genres")
+        }
+        return combined
+    }
+
+    private suspend fun fetchGenreList(type: String): List<TmdbGenre> {
+        val baseHttpUrl = baseUrl.toHttpUrl()
+        val url = baseHttpUrl.newBuilder()
+            .addPathSegments("genre/$type/list")
+            .addQueryParameter("api_key", apiKey)
+            .addQueryParameter("language", language)
+            .build()
+
+        val json = executeGet(url)
+        val response = try {
+            genreListAdapter.fromJson(json)
+                ?: throw TmdbException.ParseError("Null genre list response")
+        } catch (e: com.squareup.moshi.JsonDataException) {
+            throw TmdbException.ParseError("Invalid JSON in genre list response: ${e.message}")
+        } catch (e: java.io.IOException) {
+            throw TmdbException.ParseError("Invalid JSON in genre list response: ${e.message}")
+        }
+        return response.genres
+    }
+
+    private suspend fun searchMulti(query: String): TmdbMultiSearchResponse {
+        val baseHttpUrl = baseUrl.toHttpUrl()
+        val url = baseHttpUrl.newBuilder()
+            .addPathSegments("search/multi")
+            .addQueryParameter("api_key", apiKey)
+            .addQueryParameter("language", language)
+            .addQueryParameter("query", query)
+            .addQueryParameter("page", "1")
+            .addQueryParameter("include_adult", "false")
+            .build()
+
+        val json = executeGet(url)
+        return try {
+            searchResponseAdapter.fromJson(json)
+                ?: throw TmdbException.ParseError("Null search response")
+        } catch (e: com.squareup.moshi.JsonDataException) {
+            throw TmdbException.ParseError("Invalid JSON in search response: ${e.message}")
+        } catch (e: java.io.IOException) {
+            throw TmdbException.ParseError("Invalid JSON in search response: ${e.message}")
+        }
+    }
+
+    private suspend fun executeGet(url: okhttp3.HttpUrl): String = withContext(ioDispatcher) {
+        val request = Request.Builder().url(url).build()
+        try {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    val code = response.code
+                    throw when (code) {
+                        401 -> TmdbException.ApiKeyInvalid()
+                        in 400..499 -> TmdbException.HttpError(code, "Client error")
+                        in 500..599 -> TmdbException.HttpError(code, "Server error")
+                        else -> TmdbException.HttpError(code, "Unexpected HTTP error")
+                    }
+                }
+                response.body?.string()
+                    ?: throw TmdbException.ParseError("Empty response body")
+            }
+        } catch (e: IOException) {
+            throw TmdbException.NetworkError(e)
+        }
+    }
+
+    companion object {
+        private const val TAG = "VoiceSearch"
+    }
+}
+
+sealed class TmdbException(message: String, cause: Throwable? = null) : Exception(message, cause) {
+    class ApiKeyInvalid : TmdbException("TMDB API key is invalid or missing")
+    class NetworkError(cause: IOException) : TmdbException("Network error", cause)
+    class ParseError(description: String) : TmdbException("Parse error: $description")
+    class HttpError(val code: Int, description: String) : TmdbException("HTTP $code: $description")
 }
