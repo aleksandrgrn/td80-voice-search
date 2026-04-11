@@ -2,6 +2,7 @@ package com.voicesearch.ui
 
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
@@ -52,7 +53,13 @@ class SearchActivity : AppCompatActivity() {
             binding.voiceButton.isEnabled = true
             maybeStartVoiceSearch()
         } else {
-            Toast.makeText(this, R.string.voice_search_no_mic_permission, Toast.LENGTH_SHORT).show()
+            if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                // Пользователь отказал без "Don't ask again" — краткий Toast
+                Toast.makeText(this, R.string.voice_search_no_mic_permission, Toast.LENGTH_SHORT).show()
+            } else {
+                // "Don't ask again" — направить в App Settings
+                showPermissionSettingsDialog()
+            }
         }
     }
 
@@ -86,7 +93,11 @@ class SearchActivity : AppCompatActivity() {
         binding.voiceButton.setOnClickListener {
             if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 maybeStartVoiceSearch()
+            } else if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+                // Пользователь уже отказывал — показать rationale перед повторным запросом
+                showMicRationaleDialog()
             } else {
+                // Первый запрос или "Don't ask again" — запустить системный диалог
                 requestAudioPermission.launch(Manifest.permission.RECORD_AUDIO)
             }
         }
@@ -124,6 +135,17 @@ class SearchActivity : AppCompatActivity() {
 
         // Check accessibility service
         checkAccessibilityServiceStatus()
+
+        // Service status tap → open accessibility settings
+        binding.serviceStatusText.setOnClickListener {
+            if (!AssistantService.isRunning && !checkEnabledViaAccessibilityManager()) {
+                try {
+                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to open accessibility settings", e)
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -347,9 +369,17 @@ class SearchActivity : AppCompatActivity() {
         if (enabled) {
             binding.serviceStatusText.text = getString(R.string.accessibility_service_active)
             binding.serviceStatusText.setTextColor(getColor(R.color.service_status_active))
+            binding.serviceStatusText.isClickable = false
+            binding.serviceStatusText.isFocusable = false
+            binding.serviceStatusText.isFocusableInTouchMode = false
+            binding.serviceStatusText.contentDescription = getString(R.string.accessibility_service_active)
         } else {
-            binding.serviceStatusText.text = getString(R.string.accessibility_service_not_enabled)
+            binding.serviceStatusText.text = getString(R.string.accessibility_tap_to_enable)
             binding.serviceStatusText.setTextColor(getColor(R.color.service_status_inactive))
+            binding.serviceStatusText.isClickable = true
+            binding.serviceStatusText.isFocusable = true
+            binding.serviceStatusText.isFocusableInTouchMode = true
+            binding.serviceStatusText.contentDescription = getString(R.string.accessibility_tap_to_enable)
         }
     }
 
@@ -365,6 +395,37 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton(R.string.accessibility_skip, null)
+            .setCancelable(true)
+            .show()
+    }
+
+    private fun showMicRationaleDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.permission_rationale_title)
+            .setMessage(R.string.permission_rationale_mic)
+            .setPositiveButton(R.string.permission_allow) { _, _ ->
+                requestAudioPermission.launch(Manifest.permission.RECORD_AUDIO)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setCancelable(true)
+            .show()
+    }
+
+    private fun showPermissionSettingsDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.permission_denied_permanent_title)
+            .setMessage(R.string.permission_denied_permanent)
+            .setPositiveButton(R.string.permission_go_to_settings) { _, _ ->
+                try {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", packageName, null)
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to open app settings", e)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
             .setCancelable(true)
             .show()
     }

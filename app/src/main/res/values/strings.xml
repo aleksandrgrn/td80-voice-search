@@ -29,6 +29,13 @@
     <string name="voice_error_timeout">Речь не обнаружена. Попробуйте ещё раз</string>
     <string name="voice_error_permission">Разрешение на микрофон не предоставлено</string>
     <string name="voice_search_no_mic_permission">Без разрешения на микрофон голосовой поиск недоступен</string>
+    <string name="permission_rationale_title">Разрешение на микрофон</string>
+    <string name="permission_denied_permanent_title">Разрешение отклонено</string>
+    <string name="permission_rationale_mic">Микрофон нужен для распознавания голосового запроса. Без этого разрешения голосовой поиск не работает.</string>
+    <string name="permission_denied_permanent">Разрешение на микрофон отклонено навсегда. Включите его вручную в настройках приложения.</string>
+    <string name="permission_go_to_settings">Открыть настройки</string>
+    <string name="permission_allow">Разрешить</string>
+    <string name="accessibility_tap_to_enable">Нажмите, чтобы включить сервис</string>
     <string name="type_movie">Фильм</string>
     <string name="type_tv">Сериал</string>
     <string name="content_desc_poster">Постер</string>
