@@ -33,4 +33,7 @@
     <string name="type_tv">Сериал</string>
     <string name="content_desc_poster">Постер</string>
     <string name="loading_search">Поиск…</string>
+    <string name="launch_empty_query">Введите запрос для поиска</string>
+    <string name="launch_no_handler">%s не поддерживает поиск</string>
+    <string name="launch_error">Ошибка запуска %s</string>
 </resources>

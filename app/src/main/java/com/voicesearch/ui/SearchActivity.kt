@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.voicesearch.BuildConfig
 import com.voicesearch.R
 import com.voicesearch.dispatch.IntentDispatcher
+import com.voicesearch.dispatch.LaunchResult
 import com.voicesearch.databinding.ActivitySearchBinding
 import com.voicesearch.provider.TmdbSearchProvider
 import com.voicesearch.service.AssistantService
@@ -440,8 +441,8 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupAppButtons() {
         val allApps = IntentDispatcher.getAllApps()
-        val installedApps = IntentDispatcher.getInstalledApps(this)
-        val installedPackages = installedApps.map { it.packageName }.toSet()
+        val searchableApps = IntentDispatcher.getSearchableApps(this)
+        val searchablePackages = searchableApps.map { it.packageName }.toSet()
 
         val buttonAppMap = mapOf(
             binding.btnNum to "ru.yourok.num",
@@ -452,17 +453,32 @@ class SearchActivity : AppCompatActivity() {
 
         buttonAppMap.forEach { (button, packageName) ->
             val app = allApps.find { it.packageName == packageName }
-            if (app != null && packageName in installedPackages) {
+            if (app != null && packageName in searchablePackages) {
                 button.text = app.displayName
                 button.isEnabled = true
                 button.setOnClickListener {
                     val query = binding.searchInput.text.toString().trim()
-                    IntentDispatcher.launch(this, app, query)
+                    if (query.isBlank()) {
+                        Toast.makeText(this, R.string.launch_empty_query, Toast.LENGTH_LONG).show()
+                        return@setOnClickListener
+                    }
+                    val result = IntentDispatcher.launch(this, app, query)
+                    handleLaunchResult(result, app.displayName)
                 }
             } else {
                 button.text = app?.displayName ?: packageName
                 button.isEnabled = false
             }
+        }
+    }
+
+    private fun handleLaunchResult(result: LaunchResult, displayName: String) {
+        when (result) {
+            LaunchResult.SUCCESS -> { /* nothing */ }
+            LaunchResult.NO_HANDLER ->
+                Toast.makeText(this, getString(R.string.launch_no_handler, displayName), Toast.LENGTH_LONG).show()
+            LaunchResult.ERROR ->
+                Toast.makeText(this, getString(R.string.launch_error, displayName), Toast.LENGTH_LONG).show()
         }
     }
 

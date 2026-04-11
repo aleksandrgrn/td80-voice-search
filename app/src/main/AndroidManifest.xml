@@ -9,6 +9,19 @@
     <uses-feature android:name="android.software.leanback" android:required="true" />
     <uses-feature android:name="android.hardware.type.tv" android:required="true" />
 
+    <queries>
+        <package android:name="ru.yourok.num" />
+        <package android:name="org.smarttube.stable" />
+        <package android:name="ru.yourok.lampa" />
+        <package android:name="com.laxymedia.deluxe" />
+        <intent>
+            <action android:name="android.intent.action.SEARCH" />
+        </intent>
+        <intent>
+            <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+        </intent>
+    </queries>
+
     <application
         android:name=".VoiceSearchApp"
         android:allowBackup="false"
