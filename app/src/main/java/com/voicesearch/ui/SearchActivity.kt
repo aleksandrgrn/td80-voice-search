@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.graphics.Rect
+import android.app.SearchManager
 import android.os.Bundle
 import android.provider.Settings
 import android.speech.RecognitionListener
@@ -37,6 +38,7 @@ class SearchActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "VoiceSearch"
+        private val VOICE_ACTIONS = listOf(Intent.ACTION_ASSIST, RecognizerIntent.ACTION_WEB_SEARCH)
     }
 
     private lateinit var binding: ActivitySearchBinding
@@ -137,9 +139,15 @@ class SearchActivity : AppCompatActivity() {
 
         // Log launch source
         val fromAssistKey = intent?.getBooleanExtra(AssistantService.EXTRA_FROM_ASSIST_KEY, false) ?: false
-        Log.i(TAG, "SearchActivity launched, fromAssistKey=$fromAssistKey")
+        val fromVoiceIntent = intent?.action in VOICE_ACTIONS
+        val preFilledQuery = intent?.getStringExtra(SearchManager.QUERY)
+        Log.i(TAG, "SearchActivity launched, fromAssistKey=$fromAssistKey, fromVoiceIntent=$fromVoiceIntent, action=${intent?.action}, preFilledQuery=$preFilledQuery")
 
-        if (fromAssistKey && speechRecognizer != null) {
+        if (!preFilledQuery.isNullOrBlank()) {
+            // ROM pre-filled the query (e.g. from system speech pre-processor) — skip voice input
+            binding.searchInput.setText(preFilledQuery)
+            performSearch()
+        } else if ((fromAssistKey || fromVoiceIntent) && speechRecognizer != null) {
             pendingVoiceStart = true
         }
 
@@ -174,8 +182,14 @@ class SearchActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         intent?.let { setIntent(it) }
         val fromAssistKey = intent?.getBooleanExtra(AssistantService.EXTRA_FROM_ASSIST_KEY, false) ?: false
-        Log.i(TAG, "SearchActivity re-launched via onNewIntent, fromAssistKey=$fromAssistKey")
-        if (fromAssistKey) {
+        val fromVoiceIntent = intent?.action in VOICE_ACTIONS
+        val preFilledQuery = intent?.getStringExtra(SearchManager.QUERY)
+        Log.i(TAG, "SearchActivity re-launched via onNewIntent, fromAssistKey=$fromAssistKey, fromVoiceIntent=$fromVoiceIntent, action=${intent?.action}, preFilledQuery=$preFilledQuery")
+
+        if (!preFilledQuery.isNullOrBlank()) {
+            binding.searchInput.setText(preFilledQuery)
+            performSearch()
+        } else if (fromAssistKey || fromVoiceIntent) {
             pendingVoiceStart = true  // lifecycle-aware: реальный старт в onResume
         }
     }
