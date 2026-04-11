@@ -1,0 +1,58 @@
+# Android
+build/
+.gradle/
+local.properties
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+*.swp
+*.swo
+
+# Secrets
+.env
+*.env
+
+# OpenCode process files (local only)
+PURPOSE.md
+TASKS.md
+TEAM.md
+CHAIN.md
+CONTINUITY.md
+
+# OpenCode runtime (not project files)
+.opencode/
+execution/
+AGENTS.md
+PROCESS.md
+FIRST_README.md
+opencode.jsonc
+goals/
+docs/
+vendor/
+dialog_golosovoy_poisk_projector.md
+requirements.txt
+
+# Template specs
+specs/opencode-*
+specs/api-design-checklist.md
+specs/goal-hierarchy-pattern.md
+specs/weekly-reflection-pattern.md
+specs/workspace-health-pattern.md
+specs/README.md
+specs/ebbinghaus-memory-model.md
+specs/plans/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Misc
+tmp/
+.snapshots/
