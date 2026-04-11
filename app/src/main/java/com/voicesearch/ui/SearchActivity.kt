@@ -1,6 +1,7 @@
 package com.voicesearch.ui
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.graphics.Rect
@@ -29,6 +30,7 @@ import com.voicesearch.provider.TmdbSearchProvider
 import com.voicesearch.service.AssistantService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SearchActivity : AppCompatActivity() {
@@ -78,8 +80,16 @@ class SearchActivity : AppCompatActivity() {
         }
 
         // SpeechRecognizer initialization + voice button setup
-        if (SpeechRecognizer.isRecognitionAvailable(this)) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+        // Try standard check first, then try explicit component names for TV devices
+        // where AppsFilter may block SpeechRecognizer.isRecognitionAvailable()
+        val speechAvailable = SpeechRecognizer.isRecognitionAvailable(this) || tryExplicitSpeechComponent()
+        if (speechAvailable) {
+            val component = resolveSpeechComponent()
+            speechRecognizer = if (component != null) {
+                SpeechRecognizer.createSpeechRecognizer(this, component)
+            } else {
+                SpeechRecognizer.createSpeechRecognizer(this)
+            }
             speechRecognizer?.setRecognitionListener(voiceRecognitionListener)
             binding.voiceButton.isEnabled = true
             binding.voiceButton.contentDescription = getString(R.string.voice_search_button)
@@ -129,7 +139,7 @@ class SearchActivity : AppCompatActivity() {
         val fromAssistKey = intent?.getBooleanExtra(AssistantService.EXTRA_FROM_ASSIST_KEY, false) ?: false
         Log.i(TAG, "SearchActivity launched, fromAssistKey=$fromAssistKey")
 
-        if (fromAssistKey && SpeechRecognizer.isRecognitionAvailable(this)) {
+        if (fromAssistKey && speechRecognizer != null) {
             pendingVoiceStart = true
         }
 
@@ -152,7 +162,7 @@ class SearchActivity : AppCompatActivity() {
         super.onResume()
         checkAccessibilityServiceStatus()
         // lifecycle-aware auto-start (R4 fix)
-        if (pendingVoiceStart && SpeechRecognizer.isRecognitionAvailable(this)) {
+        if (pendingVoiceStart && speechRecognizer != null) {
             pendingVoiceStart = false
             if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 maybeStartVoiceSearch()
@@ -287,6 +297,37 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    private fun tryExplicitSpeechComponent(): Boolean {
+        return resolveSpeechComponent() != null
+    }
+
+    private fun resolveSpeechComponent(): ComponentName? {
+        val pm = packageManager
+        // Known recognition service components on Android TV devices
+        val candidates = listOf(
+            ComponentName(
+                "com.google.android.googlequicksearchbox",
+                "com.google.android.voicesearch.serviceapi.GoogleRecognitionService"
+            ),
+            ComponentName(
+                "com.google.android.tts",
+                "com.google.android.apps.speech.tts.googletts.service.GoogleTTSRecognitionService"
+            )
+        )
+        for (component in candidates) {
+            try {
+                val serviceInfo = pm.getServiceInfo(component, 0)
+                if (serviceInfo != null) {
+                    Log.i(TAG, "Found speech recognition service: ${component.flattenToString()}")
+                    return component
+                }
+            } catch (_: Exception) {
+                // Not found, try next
+            }
+        }
+        return null
+    }
+
     private fun maybeStartVoiceSearch() {
         if (isListening) {
             // Уже слушаем → остановить (toggle behaviour)
@@ -342,18 +383,51 @@ class SearchActivity : AppCompatActivity() {
     // ===== Accessibility =====
 
     private fun checkAccessibilityServiceStatus() {
+        checkAccessibilityServiceStatus(delayed = false)
+    }
+
+    private fun checkAccessibilityServiceStatus(delayed: Boolean) {
         val isRunning = AssistantService.isRunning
         val isEnabledViaManager = checkEnabledViaAccessibilityManager()
         val serviceEnabled = isRunning || isEnabledViaManager
 
         Log.i(TAG, "AccessibilityService status: isRunning=$isRunning, " +
-                "managerEnabled=$isEnabledViaManager, result=$serviceEnabled")
+                "managerEnabled=$isEnabledViaManager, result=$serviceEnabled, delayed=$delayed")
 
         updateServiceStatusText(serviceEnabled)
 
         if (!serviceEnabled && !hasShownAccessibilityDialog) {
-            hasShownAccessibilityDialog = true
-            showAccessibilityNotEnabledDialog()
+            if (!delayed) {
+                // Service not running on first check — delay to give service time to bind
+                // (Settings.Secure filtering prevents reliable isServiceInAccessibilitySettings check on Android 12+)
+                val inSettings = isServiceInAccessibilitySettings()
+                if (inSettings) {
+                    Log.i(TAG, "Service in settings but not yet bound, scheduling delayed re-check")
+                } else {
+                    Log.i(TAG, "Service not running on first check, scheduling delayed re-check (inSettings=$inSettings)")
+                }
+                lifecycleScope.launch {
+                    delay(3000)
+                    if (!isFinishing && !isDestroyed) {
+                        checkAccessibilityServiceStatus(delayed = true)
+                    }
+                }
+            } else {
+                hasShownAccessibilityDialog = true
+                showAccessibilityNotEnabledDialog()
+            }
+        }
+    }
+
+    private fun isServiceInAccessibilitySettings(): Boolean {
+        try {
+            val services = Settings.Secure.getString(contentResolver, "enabled_accessibility_services")
+            Log.d(TAG, "isServiceInAccessibilitySettings: raw='$services', lookingFor='$packageName/'")
+            if (services.isNullOrBlank()) return false
+            return services.contains("$packageName/")
+        } catch (e: Exception) {
+            Log.w(TAG, "isServiceInAccessibilitySettings: exception", e)
+            return false
         }
     }
 

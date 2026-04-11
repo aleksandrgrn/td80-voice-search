@@ -14,6 +14,9 @@
         <package android:name="org.smarttube.stable" />
         <package android:name="ru.yourok.lampa" />
         <package android:name="com.laxymedia.deluxe" />
+        <package android:name="com.google.android.googlequicksearchbox" />
+        <package android:name="com.google.android.tts" />
+        <package android:name="com.google.android.apps.gsa" />
         <intent>
             <action android:name="android.intent.action.SEARCH" />
         </intent>

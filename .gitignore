@@ -58,3 +58,4 @@ tmp/
 .snapshots/
 *.hprof
 captures/
+observations.jsonl

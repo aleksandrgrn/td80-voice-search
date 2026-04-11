@@ -18,7 +18,7 @@ object IntentDispatcher {
 
     private val TARGET_APPS = listOf(
         TargetApp("ru.yourok.num", Intent.ACTION_SEARCH, "NUM"),
-        TargetApp("org.smarttube.stable", "android.media.action.MEDIA_PLAY_FROM_SEARCH", "SmartTube", mediaFocus = "movie"),
+        TargetApp("org.smarttube.stable", Intent.ACTION_SEARCH, "SmartTube"),
         TargetApp("ru.yourok.lampa", Intent.ACTION_SEARCH, "Lampa"),
         TargetApp("com.laxymedia.deluxe", Intent.ACTION_SEARCH, "LazyMediaDeluxe"),
     )
@@ -39,7 +39,6 @@ object IntentDispatcher {
             setPackage(app.packageName)
             putExtra(SearchManager.QUERY, query)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            app.mediaFocus?.let { putExtra(EXTRA_MEDIA_FOCUS, it) }
         }
 
         val resolveInfo = pm.resolveActivity(intent, 0)
@@ -82,7 +81,6 @@ object IntentDispatcher {
                 pm.getPackageInfo(app.packageName, 0)
                 val intent = Intent(app.searchAction).apply {
                     setPackage(app.packageName)
-                    app.mediaFocus?.let { putExtra(EXTRA_MEDIA_FOCUS, it) }
                 }
                 pm.resolveActivity(intent, 0) != null
             } catch (e: PackageManager.NameNotFoundException) {
@@ -92,5 +90,4 @@ object IntentDispatcher {
     }
 
     private const val TAG = "VoiceSearch"
-    private const val EXTRA_MEDIA_FOCUS = "android.intent.extra.MEDIA_FOCUS"
 }
