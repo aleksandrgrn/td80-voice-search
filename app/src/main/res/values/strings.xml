@@ -29,4 +29,8 @@
     <string name="voice_error_timeout">Речь не обнаружена. Попробуйте ещё раз</string>
     <string name="voice_error_permission">Разрешение на микрофон не предоставлено</string>
     <string name="voice_search_no_mic_permission">Без разрешения на микрофон голосовой поиск недоступен</string>
+    <string name="type_movie">Фильм</string>
+    <string name="type_tv">Сериал</string>
+    <string name="content_desc_poster">Постер</string>
+    <string name="loading_search">Поиск…</string>
 </resources>

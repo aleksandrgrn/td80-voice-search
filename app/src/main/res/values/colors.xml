@@ -16,4 +16,5 @@
     <color name="voice_listening">#FFFFC107</color>
     <color name="voice_idle_tint">#FFFFFFFF</color>
     <color name="voice_listening_tint">#FF111111</color>
+    <color name="poster_placeholder_bg">#FF2A2A2A</color>
 </resources>

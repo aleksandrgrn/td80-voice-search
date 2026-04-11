@@ -17,6 +17,9 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_OVERVIEW = "extra_overview"
         const val EXTRA_GENRE = "extra_genre"
         const val EXTRA_DURATION = "extra_duration"
+        const val EXTRA_RATING = "extra_rating"
+        const val EXTRA_TYPE = "extra_type"
+        const val EXTRA_TMDB_ID = "extra_tmdb_id"
         private const val TAG = "VoiceSearch"
     }
 
@@ -37,6 +40,8 @@ class DetailActivity : AppCompatActivity() {
         val overview = intent.getStringExtra(EXTRA_OVERVIEW)
         val genre = intent.getStringExtra(EXTRA_GENRE)
         val duration = intent.getStringExtra(EXTRA_DURATION)
+        val rating = intent.getStringExtra(EXTRA_RATING)
+        val type = intent.getStringExtra(EXTRA_TYPE)
 
         binding.detailTitle.text = title
 
@@ -62,15 +67,37 @@ class DetailActivity : AppCompatActivity() {
             binding.detailDuration.visibility = android.view.View.GONE
         }
 
+        // Rating
+        if (!rating.isNullOrBlank()) {
+            binding.detailRating.visibility = android.view.View.VISIBLE
+            binding.detailRating.text = "★ $rating"
+        } else {
+            binding.detailRating.visibility = android.view.View.GONE
+        }
+
+        // Type
+        when (type) {
+            "movie" -> {
+                binding.detailType.visibility = android.view.View.VISIBLE
+                binding.detailType.text = getString(R.string.type_movie)
+            }
+            "tv" -> {
+                binding.detailType.visibility = android.view.View.VISIBLE
+                binding.detailType.text = getString(R.string.type_tv)
+            }
+            else -> binding.detailType.visibility = android.view.View.GONE
+        }
+
         if (!overview.isNullOrBlank()) {
             binding.detailOverview.text = overview
         }
 
         // Poster
-        if (!posterUrl.isNullOrBlank()) {
-            binding.detailPoster.load(posterUrl) {
-                crossfade(true)
-            }
+        binding.detailPoster.load(posterUrl?.takeIf { it.isNotBlank() }) {
+            crossfade(true)
+            placeholder(R.drawable.bg_poster_placeholder)
+            error(R.drawable.ic_no_poster)
+            fallback(R.drawable.ic_no_poster)
         }
 
         // App buttons

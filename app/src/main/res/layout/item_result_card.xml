@@ -1,35 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="160dp"
-    android:layout_height="240dp"
+    android:layout_width="180dp"
+    android:layout_height="280dp"
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:background="@drawable/bg_card_selector"
     android:clickable="true">
 
+    <!-- Poster -->
     <ImageView
         android:id="@+id/poster"
         android:layout_width="match_parent"
-        android:layout_height="192dp"
+        android:layout_height="216dp"
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:scaleType="centerCrop"
-        android:contentDescription="Poster" />
+        android:contentDescription="@string/content_desc_poster" />
 
+    <!-- Type badge (top-right) -->
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/typeBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:background="@drawable/bg_type_badge"
+        android:textSize="10sp"
+        android:textColor="@color/text_primary"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:visibility="gone" />
+
+    <!-- Rating badge (top-left) -->
+    <TextView
+        android:id="@+id/ratingBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:background="@drawable/bg_type_badge"
+        android:textSize="11sp"
+        android:textColor="@color/accent_yellow"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:visibility="gone" />
+
+    <!-- Info row (bottom: year + title) -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="52dp"
         android:layout_gravity="bottom"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
-        android:textColor="@color/text_primary"
-        android:textSize="12sp"
-        android:maxLines="2"
-        android:ellipsize="end"
+        android:orientation="vertical"
         android:gravity="center"
-        android:focusable="false" />
+        android:focusable="false"
+        android:focusableInTouchMode="false">
+
+        <TextView
+            android:id="@+id/year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/accent_yellow"
+            android:textSize="11sp"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
+
+    </LinearLayout>
 
 </FrameLayout>

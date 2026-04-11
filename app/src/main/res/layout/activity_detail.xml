@@ -33,7 +33,7 @@
         android:layout_marginTop="16dp"
         android:scaleType="centerCrop"
         android:background="@color/card_default"
-        android:contentDescription="Poster"
+        android:contentDescription="@string/content_desc_poster"
         android:focusable="false"
         app:layout_constraintTop_toBottomOf="@id/backButton"
         app:layout_constraintStart_toStartOf="parent" />
@@ -68,6 +68,36 @@
         app:layout_constraintStart_toEndOf="@id/detailPoster"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Rating -->
+    <TextView
+        android:id="@+id/detailRating"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_yellow"
+        android:textSize="16sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:focusable="false"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/detailYear"
+        app:layout_constraintStart_toEndOf="@id/detailPoster"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Type -->
+    <TextView
+        android:id="@+id/detailType"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:focusable="false"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/detailRating"
+        app:layout_constraintStart_toEndOf="@id/detailPoster"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Genre -->
     <TextView
         android:id="@+id/detailGenre"
@@ -79,7 +109,7 @@
         android:layout_marginTop="4dp"
         android:focusable="false"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/detailYear"
+        app:layout_constraintTop_toBottomOf="@id/detailType"
         app:layout_constraintStart_toEndOf="@id/detailPoster"
         app:layout_constraintEnd_toEndOf="parent" />
 

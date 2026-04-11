@@ -2,6 +2,7 @@ package com.voicesearch.ui
 
 import android.Manifest
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
 import android.provider.Settings
 import android.speech.RecognitionListener
@@ -17,12 +18,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.voicesearch.BuildConfig
 import com.voicesearch.R
 import com.voicesearch.dispatch.IntentDispatcher
 import com.voicesearch.databinding.ActivitySearchBinding
 import com.voicesearch.provider.TmdbSearchProvider
 import com.voicesearch.service.AssistantService
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class SearchActivity : AppCompatActivity() {
@@ -38,6 +42,7 @@ class SearchActivity : AppCompatActivity() {
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
     private var pendingVoiceStart = false
+    private var searchJob: Job? = null
 
     private val requestAudioPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -102,6 +107,7 @@ class SearchActivity : AppCompatActivity() {
         binding.resultsRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@SearchActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = searchAdapter
+            addItemDecoration(HorizontalSpaceItemDecoration(12))
         }
 
         // App buttons
@@ -152,7 +158,7 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // R1 mitigation: prevent SpeechRecognizer leak
+        searchJob?.cancel()
         speechRecognizer?.destroy()
         speechRecognizer = null
     }
@@ -368,20 +374,47 @@ class SearchActivity : AppCompatActivity() {
         val query = binding.searchInput.text.toString().trim()
         if (query.isBlank()) return
 
+        // Cancel previous search
+        searchJob?.cancel()
+
+        // Show loading
+        binding.searchProgressBar.visibility = android.view.View.VISIBLE
+        binding.resultsRecyclerView.visibility = android.view.View.GONE
+        binding.emptyStateText.visibility = android.view.View.GONE
+        binding.providerLabel.visibility = android.view.View.GONE
+
         if (BuildConfig.DEBUG) {
             Log.i(TAG, "Performing search: $query")
         }
-        lifecycleScope.launch {
+
+        searchJob = lifecycleScope.launch {
             try {
                 val results = tmdbProvider.search(query)
                 searchAdapter.submitList(results)
-                binding.emptyStateText.visibility = if (results.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
-                binding.resultsRecyclerView.visibility = if (results.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+
+                // Dynamic provider label from provider
+                binding.providerLabel.text = tmdbProvider.displayName
+                // TODO: При добавлении нового CARDS-провайдера → переход к ConcatAdapter с секциями-заголовками
+                binding.providerLabel.visibility = android.view.View.VISIBLE
+
+                binding.searchProgressBar.visibility = android.view.View.GONE
+                if (results.isEmpty()) {
+                    binding.emptyStateText.visibility = android.view.View.VISIBLE
+                    binding.resultsRecyclerView.visibility = android.view.View.GONE
+                } else {
+                    binding.resultsRecyclerView.visibility = android.view.View.VISIBLE
+                    binding.emptyStateText.visibility = android.view.View.GONE
+                }
+            } catch (e: CancellationException) {
+                // Не обновляем UI — Activity уничтожается
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Search failed", e)
                 searchAdapter.submitList(emptyList())
+                binding.searchProgressBar.visibility = android.view.View.GONE
                 binding.emptyStateText.visibility = android.view.View.VISIBLE
                 binding.resultsRecyclerView.visibility = android.view.View.GONE
+                binding.providerLabel.visibility = android.view.View.GONE
             }
         }
     }
@@ -396,6 +429,9 @@ class SearchActivity : AppCompatActivity() {
             putExtra(DetailActivity.EXTRA_OVERVIEW, result.overview)
             putExtra(DetailActivity.EXTRA_GENRE, result.metadata["genre"])
             putExtra(DetailActivity.EXTRA_DURATION, result.metadata["duration"])
+            putExtra(DetailActivity.EXTRA_RATING, result.metadata["rating"])
+            putExtra(DetailActivity.EXTRA_TYPE, result.metadata["type"])
+            putExtra(DetailActivity.EXTRA_TMDB_ID, result.metadata["tmdbId"])
         }
         startActivity(intent)
     }
@@ -427,6 +463,19 @@ class SearchActivity : AppCompatActivity() {
                 button.text = app?.displayName ?: packageName
                 button.isEnabled = false
             }
+        }
+    }
+
+    // ===== Item decoration =====
+
+    private class HorizontalSpaceItemDecoration(private val space: Int) : RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: android.view.View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            outRect.right = space
         }
     }
 }
