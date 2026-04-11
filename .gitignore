@@ -56,3 +56,5 @@ __pycache__/
 # Misc
 tmp/
 .snapshots/
+*.hprof
+captures/
