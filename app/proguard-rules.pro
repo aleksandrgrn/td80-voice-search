@@ -21,4 +21,5 @@
 -keep class com.voicesearch.provider.TmdbGenreListResponse { *; }
 -keep class com.voicesearch.provider.TmdbGenre { *; }
 -keep class com.voicesearch.provider.TmdbException { *; }
+-keep class com.voicesearch.provider.TmdbException$* { *; }
 -keep class com.voicesearch.provider.TmdbMapper { *; }

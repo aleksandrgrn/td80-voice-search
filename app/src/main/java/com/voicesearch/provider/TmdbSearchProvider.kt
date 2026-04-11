@@ -18,7 +18,7 @@ class TmdbSearchProvider(
     private val apiKey: String,
     private val language: String = "ru-RU",
     private val baseUrl: String = "https://api.themoviedb.org/3/",
-    private val client: OkHttpClient = OkHttpClient(),
+    private val client: OkHttpClient = com.voicesearch.VoiceSearchApp.httpClient,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : SearchProvider {
 

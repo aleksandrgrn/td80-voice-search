@@ -3,6 +3,17 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Load local.properties so findProperty can access custom keys (e.g. tmdb.api.key)
+import java.util.Properties
+val localProps = Properties()
+val localPropsFile = rootProject.file("local.properties")
+if (localPropsFile.exists()) {
+    localProps.load(localPropsFile.inputStream())
+}
+localProps.forEach { k: Any?, v: Any? ->
+    project.extra.set(k.toString(), v)
+}
+
 android {
     namespace = "com.voicesearch"
     compileSdk = 34
@@ -15,6 +26,14 @@ android {
         versionName = "1.0.0"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            // Используем стандартный debug keystore для release-сборки
+            // Это позволяет устанавливать release APK на устройство для тестирования
+            // Для production нужно создать отдельный keystore
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
@@ -23,6 +42,7 @@ android {
         }
         release {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("debug")  // TODO: заменить на release keystore для production
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

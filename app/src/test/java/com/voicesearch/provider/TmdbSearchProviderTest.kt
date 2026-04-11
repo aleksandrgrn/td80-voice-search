@@ -1,6 +1,7 @@
 package com.voicesearch.provider
 
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -19,7 +20,8 @@ class TmdbSearchProviderTest {
         server.start()
         provider = TmdbSearchProvider(
             apiKey = "test-api-key",
-            baseUrl = server.url("/3/").toString()
+            baseUrl = server.url("/3/").toString(),
+            client = OkHttpClient()
         )
     }
 
@@ -102,7 +104,8 @@ class TmdbSearchProviderTest {
     fun `search returns empty list when apiKey is PLACEHOLDER`() = runBlocking {
         val placeholderProvider = TmdbSearchProvider(
             apiKey = "PLACEHOLDER",
-            baseUrl = server.url("/3/").toString()
+            baseUrl = server.url("/3/").toString(),
+            client = OkHttpClient()
         )
 
         val results = placeholderProvider.search("test")
@@ -114,7 +117,8 @@ class TmdbSearchProviderTest {
     fun `search returns empty list when apiKey is PLACEHOLDER_GET_YOUR_KEY`() = runBlocking {
         val placeholderProvider = TmdbSearchProvider(
             apiKey = "PLACEHOLDER_GET_YOUR_KEY",
-            baseUrl = server.url("/3/").toString()
+            baseUrl = server.url("/3/").toString(),
+            client = OkHttpClient()
         )
 
         val results = placeholderProvider.search("test")
@@ -126,7 +130,8 @@ class TmdbSearchProviderTest {
     fun `search returns empty list when apiKey is blank`() = runBlocking {
         val blankProvider = TmdbSearchProvider(
             apiKey = "",
-            baseUrl = server.url("/3/").toString()
+            baseUrl = server.url("/3/").toString(),
+            client = OkHttpClient()
         )
 
         val results = blankProvider.search("test")
