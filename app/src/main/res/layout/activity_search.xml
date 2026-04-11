@@ -1,26 +1,199 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@color/bg_primary"
+    android:paddingStart="48dp"
+    android:paddingEnd="48dp"
+    android:paddingTop="48dp"
+    android:paddingBottom="48dp">
 
+    <!-- ===== Top: Search bar ===== -->
+    <LinearLayout
+        android:id="@+id/searchBarContainer"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_search_bar"
+        android:paddingStart="12dp"
+        android:paddingEnd="4dp"
+        android:focusable="false"
+        android:descendantFocusability="afterDescendants"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <EditText
+            android:id="@+id/searchInput"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="@string/search_hint"
+            android:textColorHint="@color/text_secondary"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:singleLine="true"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:nextFocusDown="@id/resultsRecyclerView"
+            android:nextFocusRight="@id/voiceButton" />
+
+        <ImageButton
+            android:id="@+id/voiceButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_mic"
+            android:background="@drawable/bg_app_button_selector"
+            android:contentDescription="@string/voice_search_button"
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:nextFocusLeft="@id/searchInput"
+            android:nextFocusDown="@id/resultsRecyclerView" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSimulateVoice"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="@string/simulate_voice"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:visibility="gone"
+            android:nextFocusLeft="@id/voiceButton"
+            android:nextFocusDown="@id/resultsRecyclerView"
+            android:nextFocusUp="@id/searchInput" />
+
+    </LinearLayout>
+
+    <!-- ===== Middle: Provider label + RecyclerView + empty state ===== -->
     <TextView
+        android:id="@+id/providerLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/app_name"
-        android:textColor="@android:color/white"
-        android:textSize="24sp" />
+        android:text="TMDB"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/searchBarContainer"
+        app:layout_constraintStart_toStartOf="parent" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/resultsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:descendantFocusability="afterDescendants"
+        android:focusable="false"
+        app:layout_constraintTop_toBottomOf="@id/providerLabel"
+        app:layout_constraintBottom_toTopOf="@id/appButtonsContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/emptyStateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_results"
+        android:textColor="@color/text_secondary"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/resultsRecyclerView"
+        app:layout_constraintBottom_toBottomOf="@id/resultsRecyclerView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ===== Bottom: App buttons ===== -->
+    <LinearLayout
+        android:id="@+id/appButtonsContainer"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/searchInLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_in_label"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:layout_marginEnd="12dp"
+            android:focusable="false" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnNum"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="NUM"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/resultsRecyclerView"
+            android:nextFocusRight="@id/btnSmartTube" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSmartTube"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="SmartTube"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/resultsRecyclerView"
+            android:nextFocusLeft="@id/btnNum"
+            android:nextFocusRight="@id/btnLampa" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLampa"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Lampa"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/resultsRecyclerView"
+            android:nextFocusLeft="@id/btnSmartTube"
+            android:nextFocusRight="@id/btnLazyMedia" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLazyMedia"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="LazyMedia"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/resultsRecyclerView"
+            android:nextFocusLeft="@id/btnLampa" />
+
+    </LinearLayout>
+
+    <!-- ===== Corner: Service status ===== -->
     <TextView
         android:id="@+id/serviceStatusText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:textColor="@android:color/white"
-        android:textSize="12sp"
-        android:alpha="0.6" />
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
+        android:alpha="0.4"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,6 +16,7 @@ object IntentDispatcher {
     )
 
     fun launch(context: Context, app: TargetApp, query: String): Boolean {
+        if (query.isBlank()) return false
         val pm = context.packageManager
         return try {
             pm.getPackageInfo(app.packageName, 0)
@@ -35,6 +36,8 @@ object IntentDispatcher {
             false
         }
     }
+
+    fun getAllApps(): List<TargetApp> = TARGET_APPS
 
     fun getInstalledApps(context: Context): List<TargetApp> {
         val pm = context.packageManager

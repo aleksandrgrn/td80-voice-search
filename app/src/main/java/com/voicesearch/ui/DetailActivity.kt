@@ -1,12 +1,109 @@
 package com.voicesearch.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import coil.load
 import com.voicesearch.R
+import com.voicesearch.dispatch.IntentDispatcher
+import com.voicesearch.databinding.ActivityDetailBinding
 
 class DetailActivity : AppCompatActivity() {
+
+    companion object {
+        const val EXTRA_TITLE = "extra_title"
+        const val EXTRA_POSTER_URL = "extra_poster_url"
+        const val EXTRA_YEAR = "extra_year"
+        const val EXTRA_OVERVIEW = "extra_overview"
+        const val EXTRA_GENRE = "extra_genre"
+        const val EXTRA_DURATION = "extra_duration"
+        private const val TAG = "VoiceSearch"
+    }
+
+    private lateinit var binding: ActivityDetailBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail)
+        binding = ActivityDetailBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // Back button
+        binding.backButton.setOnClickListener { finish() }
+
+        // Populate details from intent
+        val title = intent.getStringExtra(EXTRA_TITLE) ?: ""
+        val posterUrl = intent.getStringExtra(EXTRA_POSTER_URL)
+        val year = intent.getStringExtra(EXTRA_YEAR)
+        val overview = intent.getStringExtra(EXTRA_OVERVIEW)
+        val genre = intent.getStringExtra(EXTRA_GENRE)
+        val duration = intent.getStringExtra(EXTRA_DURATION)
+
+        binding.detailTitle.text = title
+
+        if (!year.isNullOrBlank()) {
+            binding.detailYear.text = year
+        } else {
+            binding.detailYear.visibility = android.view.View.GONE
+        }
+
+        // Genre: show only if present
+        if (!genre.isNullOrBlank()) {
+            binding.detailGenre.text = genre
+            binding.detailGenre.visibility = android.view.View.VISIBLE
+        } else {
+            binding.detailGenre.visibility = android.view.View.GONE
+        }
+
+        // Duration: show only if present
+        if (!duration.isNullOrBlank()) {
+            binding.detailDuration.text = duration
+            binding.detailDuration.visibility = android.view.View.VISIBLE
+        } else {
+            binding.detailDuration.visibility = android.view.View.GONE
+        }
+
+        if (!overview.isNullOrBlank()) {
+            binding.detailOverview.text = overview
+        }
+
+        // Poster
+        if (!posterUrl.isNullOrBlank()) {
+            binding.detailPoster.load(posterUrl) {
+                crossfade(true)
+            }
+        }
+
+        // App buttons
+        setupAppButtons(title)
+    }
+
+    private fun setupAppButtons(query: String) {
+        val allApps = IntentDispatcher.getAllApps()
+        val installedApps = IntentDispatcher.getInstalledApps(this)
+        val installedPackages = installedApps.map { it.packageName }.toSet()
+
+        val buttonAppMap = mapOf(
+            binding.btnNum to "ru.yourok.num",
+            binding.btnSmartTube to "org.smarttube.stable",
+            binding.btnLampa to "ru.yourok.lampa",
+            binding.btnLazyMedia to "com.laxymedia.deluxe",
+        )
+
+        buttonAppMap.forEach { (button, packageName) ->
+            val app = allApps.find { it.packageName == packageName }
+            if (app != null && packageName in installedPackages) {
+                button.text = app.displayName
+                button.isEnabled = true
+                button.setOnClickListener {
+                    val launched = IntentDispatcher.launch(this, app, query)
+                    if (!launched) {
+                        Log.w(TAG, "Failed to launch ${app.displayName} with query: $query")
+                    }
+                }
+            } else {
+                button.text = app?.displayName ?: packageName
+                button.isEnabled = false
+            }
+        }
     }
 }

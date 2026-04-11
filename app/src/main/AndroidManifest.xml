@@ -22,6 +22,7 @@
             android:name=".ui.SearchActivity"
             android:exported="true"
             android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden"
             android:configChanges="keyboard|keyboardHidden|navigation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,6 +35,7 @@
             android:name=".ui.DetailActivity"
             android:exported="false"
             android:screenOrientation="landscape"
+            android:theme="@style/Theme.VoiceSearch"
             android:parentActivityName=".ui.SearchActivity" />
 
         <service

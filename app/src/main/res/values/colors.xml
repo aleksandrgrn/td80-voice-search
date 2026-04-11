@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_primary">#FF111111</color>
+    <color name="card_default">#FF222222</color>
+    <color name="card_focused">#FF332200</color>
+    <color name="focus_ring">#FFCC8800</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#99FFFFFF</color>
+    <color name="accent_yellow">#FFFFC107</color>
+    <color name="button_app_default">#FF2A2A2A</color>
+    <color name="button_app_focused">#FF444444</color>
+    <color name="button_app_disabled">#FF1A1A1A</color>
+    <color name="search_bar_bg">#FF2A2A2A</color>
+    <color name="service_status_active">#FF4CAF50</color>
+    <color name="service_status_inactive">#FFF44336</color>
+</resources>

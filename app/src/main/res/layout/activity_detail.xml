@@ -1,15 +1,198 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@color/bg_primary"
+    android:paddingStart="48dp"
+    android:paddingEnd="48dp"
+    android:paddingTop="48dp"
+    android:paddingBottom="48dp">
 
+    <!-- Back button -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_back"
+        android:background="@drawable/bg_app_button_selector"
+        android:contentDescription="@string/back_button"
+        android:scaleType="centerInside"
+        android:padding="8dp"
+        android:nextFocusDown="@id/detailTitle"
+        android:nextFocusRight="@id/detailTitle"
+        android:nextFocusLeft="@id/backButton"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Poster -->
+    <ImageView
+        android:id="@+id/detailPoster"
+        android:layout_width="240dp"
+        android:layout_height="360dp"
+        android:layout_marginTop="16dp"
+        android:scaleType="centerCrop"
+        android:background="@color/card_default"
+        android:contentDescription="Poster"
+        android:focusable="false"
+        app:layout_constraintTop_toBottomOf="@id/backButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Title -->
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/detailTitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Detail"
-        android:textColor="@android:color/white"
-        android:textSize="24sp" />
+        android:textColor="@color/text_primary"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:nextFocusUp="@id/backButton"
+        android:nextFocusDown="@id/appButtonsContainer"
+        app:layout_constraintTop_toBottomOf="@id/backButton"
+        app:layout_constraintStart_toEndOf="@id/detailPoster"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-</FrameLayout>
+    <!-- Year -->
+    <TextView
+        android:id="@+id/detailYear"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/accent_yellow"
+        android:textSize="16sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:focusable="false"
+        app:layout_constraintTop_toBottomOf="@id/detailTitle"
+        app:layout_constraintStart_toEndOf="@id/detailPoster"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Genre -->
+    <TextView
+        android:id="@+id/detailGenre"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:focusable="false"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/detailYear"
+        app:layout_constraintStart_toEndOf="@id/detailPoster"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Duration -->
+    <TextView
+        android:id="@+id/detailDuration"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:focusable="false"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/detailGenre"
+        app:layout_constraintStart_toEndOf="@id/detailPoster"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Overview -->
+    <TextView
+        android:id="@+id/detailOverview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="8"
+        android:focusable="false"
+        app:layout_constraintTop_toBottomOf="@id/detailDuration"
+        app:layout_constraintBottom_toTopOf="@id/appButtonsContainer"
+        app:layout_constraintStart_toEndOf="@id/detailPoster"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- App buttons -->
+    <LinearLayout
+        android:id="@+id/appButtonsContainer"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/searchInLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_in_label"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:layout_marginEnd="12dp"
+            android:focusable="false" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnNum"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="NUM"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/backButton"
+            android:nextFocusDown="@id/backButton"
+            android:nextFocusRight="@id/btnSmartTube" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnSmartTube"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="SmartTube"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/backButton"
+            android:nextFocusDown="@id/backButton"
+            android:nextFocusLeft="@id/btnNum"
+            android:nextFocusRight="@id/btnLampa" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLampa"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Lampa"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/backButton"
+            android:nextFocusDown="@id/backButton"
+            android:nextFocusLeft="@id/btnSmartTube"
+            android:nextFocusRight="@id/btnLazyMedia" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnLazyMedia"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="LazyMedia"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:background="@drawable/bg_app_button_selector"
+            android:nextFocusUp="@id/backButton"
+            android:nextFocusDown="@id/backButton"
+            android:nextFocusLeft="@id/btnLampa" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

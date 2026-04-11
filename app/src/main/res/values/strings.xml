@@ -9,4 +9,16 @@
     <string name="accessibility_skip">Пропустить</string>
     <string name="accessibility_service_active">● Сервис доступности активен</string>
     <string name="accessibility_service_not_enabled">● Сервис доступности не включён</string>
+
+    <!-- Search UI -->
+    <string name="search_hint">Поиск фильмов и сериалов…</string>
+    <string name="voice_search_button">Голосовой поиск</string>
+    <string name="no_results">Ничего не найдено</string>
+    <string name="search_in_label">Искать в:</string>
+    <string name="back_button">Назад</string>
+    <string name="app_not_installed">не установлено</string>
+    <string name="simulate_voice">Симулировать голос</string>
+    <string name="voice_not_available">Голосовой поиск (недоступен)</string>
+    <string name="voice_search_future">Голосовой поиск будет доступен в следующей версии</string>
+    <string name="voice_search_no_mic_permission">Без разрешения на микрофон голосовой поиск недоступен</string>
 </resources>
