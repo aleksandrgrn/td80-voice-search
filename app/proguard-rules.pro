@@ -10,3 +10,4 @@
 }
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler
+-keep class com.voicesearch.service.AssistantService { *; }

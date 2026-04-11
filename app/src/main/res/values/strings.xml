@@ -2,4 +2,11 @@
 <resources>
     <string name="app_name">Голосовой поиск</string>
     <string name="accessibility_service_description">Перехват кнопки голосового поиска для запуска приложения Голосовой поиск</string>
+    <string name="accessibility_service_label">Голосовой поиск — перехват кнопки</string>
+    <string name="accessibility_not_enabled_title">Включите сервис доступности</string>
+    <string name="accessibility_not_enabled_message">Для перехвата кнопки голосового поиска необходимо включить сервис доступности:\n\n1. Откройте Настройки → Специальные возможности\n2. Найдите «Голосовой поиск — перехват кнопки»\n3. Включите сервис и подтвердите разрешение</string>
+    <string name="accessibility_open_settings">Открыть настройки</string>
+    <string name="accessibility_skip">Пропустить</string>
+    <string name="accessibility_service_active">● Сервис доступности активен</string>
+    <string name="accessibility_service_not_enabled">● Сервис доступности не включён</string>
 </resources>
