@@ -612,7 +612,18 @@ class SearchActivity : AppCompatActivity() {
                         return@setOnClickListener
                     }
 
-                    val result = IntentDispatcher.launch(this, app, query)
+                    val result = if (packageName == IntentDispatcher.PKG_NUM) {
+                        // Каталог NUM — тот же TMDB: открываем верхний результат,
+                        // а не запускаем поиск заново.
+                        val top = searchAdapter.currentList.firstOrNull()
+                        IntentDispatcher.launchWithTmdb(
+                            this, app, query,
+                            top?.metadata?.get("tmdbId"),
+                            top?.metadata?.get("type")
+                        )
+                    } else {
+                        IntentDispatcher.launch(this, app, query)
+                    }
                     handleLaunchResult(result, app.displayName)
                 }
             } else {
