@@ -3,12 +3,6 @@
     <string name="app_name">Голосовой поиск</string>
     <string name="accessibility_service_description">Перехват кнопки голосового поиска для запуска приложения Голосовой поиск</string>
     <string name="accessibility_service_label">Голосовой поиск — перехват кнопки</string>
-    <string name="accessibility_not_enabled_title">Включите сервис доступности</string>
-    <string name="accessibility_not_enabled_message">Для перехвата кнопки голосового поиска необходимо включить сервис доступности:\n\n1. Откройте Настройки → Специальные возможности\n2. Найдите «Голосовой поиск — перехват кнопки»\n3. Включите сервис и подтвердите разрешение</string>
-    <string name="accessibility_open_settings">Открыть настройки</string>
-    <string name="accessibility_skip">Пропустить</string>
-    <string name="accessibility_service_active">● Сервис доступности активен</string>
-    <string name="accessibility_service_not_enabled">● Сервис доступности не включён</string>
 
     <!-- Search UI -->
     <string name="search_hint">Поиск фильмов и сериалов…</string>
@@ -35,7 +29,6 @@
     <string name="permission_denied_permanent">Разрешение на микрофон отклонено навсегда. Включите его вручную в настройках приложения.</string>
     <string name="permission_go_to_settings">Открыть настройки</string>
     <string name="permission_allow">Разрешить</string>
-    <string name="accessibility_tap_to_enable">Нажмите, чтобы включить сервис</string>
     <string name="type_movie">Фильм</string>
     <string name="type_tv">Сериал</string>
     <string name="content_desc_poster">Постер</string>

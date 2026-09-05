@@ -13,7 +13,6 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
 import android.view.inputmethod.EditorInfo
-import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -28,10 +27,8 @@ import com.voicesearch.dispatch.IntentDispatcher
 import com.voicesearch.dispatch.LaunchResult
 import com.voicesearch.databinding.ActivitySearchBinding
 import com.voicesearch.provider.TmdbSearchProvider
-import com.voicesearch.service.AssistantService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SearchActivity : AppCompatActivity() {
@@ -44,7 +41,6 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var searchAdapter: SearchAdapter
     private lateinit var tmdbProvider: TmdbSearchProvider
-    private var hasShownAccessibilityDialog = false
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
     private var pendingVoiceStart = false
@@ -138,37 +134,21 @@ class SearchActivity : AppCompatActivity() {
         setupAppButtons()
 
         // Log launch source
-        val fromAssistKey = intent?.getBooleanExtra(AssistantService.EXTRA_FROM_ASSIST_KEY, false) ?: false
         val fromVoiceIntent = intent?.action in VOICE_ACTIONS
         val preFilledQuery = intent?.getStringExtra(SearchManager.QUERY)
-        Log.i(TAG, "SearchActivity launched, fromAssistKey=$fromAssistKey, fromVoiceIntent=$fromVoiceIntent, action=${intent?.action}, preFilledQuery=$preFilledQuery")
+        Log.i(TAG, "SearchActivity launched, fromVoiceIntent=$fromVoiceIntent, action=${intent?.action}, preFilledQuery=$preFilledQuery")
 
         if (!preFilledQuery.isNullOrBlank()) {
             // ROM pre-filled the query (e.g. from system speech pre-processor) — skip voice input
             binding.searchInput.setText(preFilledQuery)
             performSearch()
-        } else if ((fromAssistKey || fromVoiceIntent) && speechRecognizer != null) {
+        } else if (fromVoiceIntent && speechRecognizer != null) {
             pendingVoiceStart = true
-        }
-
-        // Check accessibility service
-        checkAccessibilityServiceStatus()
-
-        // Service status tap → open accessibility settings
-        binding.serviceStatusText.setOnClickListener {
-            if (!AssistantService.isRunning && !checkEnabledViaAccessibilityManager()) {
-                try {
-                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to open accessibility settings", e)
-                }
-            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        checkAccessibilityServiceStatus()
         // lifecycle-aware auto-start (R4 fix)
         if (pendingVoiceStart && speechRecognizer != null) {
             pendingVoiceStart = false
@@ -181,15 +161,14 @@ class SearchActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         intent?.let { setIntent(it) }
-        val fromAssistKey = intent?.getBooleanExtra(AssistantService.EXTRA_FROM_ASSIST_KEY, false) ?: false
         val fromVoiceIntent = intent?.action in VOICE_ACTIONS
         val preFilledQuery = intent?.getStringExtra(SearchManager.QUERY)
-        Log.i(TAG, "SearchActivity re-launched via onNewIntent, fromAssistKey=$fromAssistKey, fromVoiceIntent=$fromVoiceIntent, action=${intent?.action}, preFilledQuery=$preFilledQuery")
+        Log.i(TAG, "SearchActivity re-launched via onNewIntent, fromVoiceIntent=$fromVoiceIntent, action=${intent?.action}, preFilledQuery=$preFilledQuery")
 
         if (!preFilledQuery.isNullOrBlank()) {
             binding.searchInput.setText(preFilledQuery)
             performSearch()
-        } else if (fromAssistKey || fromVoiceIntent) {
+        } else if (fromVoiceIntent) {
             pendingVoiceStart = true  // lifecycle-aware: реальный старт в onResume
         }
     }
@@ -392,99 +371,6 @@ class SearchActivity : AppCompatActivity() {
         Log.i(TAG, "Debug: simulating voice search with query='$simulatedText'")
         binding.searchInput.setText(simulatedText)
         performSearch()
-    }
-
-    // ===== Accessibility =====
-
-    private fun checkAccessibilityServiceStatus() {
-        checkAccessibilityServiceStatus(delayed = false)
-    }
-
-    private fun checkAccessibilityServiceStatus(delayed: Boolean) {
-        val isRunning = AssistantService.isRunning
-        val isEnabledViaManager = checkEnabledViaAccessibilityManager()
-        val serviceEnabled = isRunning || isEnabledViaManager
-
-        Log.i(TAG, "AccessibilityService status: isRunning=$isRunning, " +
-                "managerEnabled=$isEnabledViaManager, result=$serviceEnabled, delayed=$delayed")
-
-        updateServiceStatusText(serviceEnabled)
-
-        if (!serviceEnabled && !hasShownAccessibilityDialog) {
-            if (!delayed) {
-                // Service not running on first check — delay to give service time to bind
-                // (Settings.Secure filtering prevents reliable isServiceInAccessibilitySettings check on Android 12+)
-                val inSettings = isServiceInAccessibilitySettings()
-                if (inSettings) {
-                    Log.i(TAG, "Service in settings but not yet bound, scheduling delayed re-check")
-                } else {
-                    Log.i(TAG, "Service not running on first check, scheduling delayed re-check (inSettings=$inSettings)")
-                }
-                lifecycleScope.launch {
-                    delay(3000)
-                    if (!isFinishing && !isDestroyed) {
-                        checkAccessibilityServiceStatus(delayed = true)
-                    }
-                }
-            } else {
-                hasShownAccessibilityDialog = true
-                showAccessibilityNotEnabledDialog()
-            }
-        }
-    }
-
-    private fun isServiceInAccessibilitySettings(): Boolean {
-        try {
-            val services = Settings.Secure.getString(contentResolver, "enabled_accessibility_services")
-            Log.d(TAG, "isServiceInAccessibilitySettings: raw='$services', lookingFor='$packageName/'")
-            if (services.isNullOrBlank()) return false
-            return services.contains("$packageName/")
-        } catch (e: Exception) {
-            Log.w(TAG, "isServiceInAccessibilitySettings: exception", e)
-            return false
-        }
-    }
-
-    private fun checkEnabledViaAccessibilityManager(): Boolean {
-        val am = getSystemService(AccessibilityManager::class.java) ?: return false
-        val enabledServices = am.getEnabledAccessibilityServiceList(
-            android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC
-        )
-        return enabledServices.any { it.id.startsWith("$packageName/") }
-    }
-
-    private fun updateServiceStatusText(enabled: Boolean) {
-        if (enabled) {
-            binding.serviceStatusText.text = getString(R.string.accessibility_service_active)
-            binding.serviceStatusText.setTextColor(getColor(R.color.service_status_active))
-            binding.serviceStatusText.isClickable = false
-            binding.serviceStatusText.isFocusable = false
-            binding.serviceStatusText.isFocusableInTouchMode = false
-            binding.serviceStatusText.contentDescription = getString(R.string.accessibility_service_active)
-        } else {
-            binding.serviceStatusText.text = getString(R.string.accessibility_tap_to_enable)
-            binding.serviceStatusText.setTextColor(getColor(R.color.service_status_inactive))
-            binding.serviceStatusText.isClickable = true
-            binding.serviceStatusText.isFocusable = true
-            binding.serviceStatusText.isFocusableInTouchMode = true
-            binding.serviceStatusText.contentDescription = getString(R.string.accessibility_tap_to_enable)
-        }
-    }
-
-    private fun showAccessibilityNotEnabledDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.accessibility_not_enabled_title)
-            .setMessage(R.string.accessibility_not_enabled_message)
-            .setPositiveButton(R.string.accessibility_open_settings) { _, _ ->
-                try {
-                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to open accessibility settings", e)
-                }
-            }
-            .setNegativeButton(R.string.accessibility_skip, null)
-            .setCancelable(true)
-            .show()
     }
 
     private fun showMicRationaleDialog() {
