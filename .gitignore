@@ -18,7 +18,28 @@ local.properties
 .env
 *.env
 
+# OpenCode process files (local only)
+PURPOSE.md
+TASKS.md
+TEAM.md
+CHAIN.md
+
+# Локальные заметки проекта: журналы работы, внутри — LAN-адреса устройств
+AUDIT.md
+VOICE_SEARCH_HISTORY.md
+
 # OpenCode runtime (not project files)
+.opencode/
+execution/
+AGENTS.md
+PROCESS.md
+FIRST_README.md
+opencode.jsonc
+goals/
+docs/
+vendor/
+observations.jsonl
+requirements.txt
 dialog_golosovoy_poisk_projector.md
 # Пересоздаётся opencode и содержит живой TMDB-ключ.
 CONTINUITY.md
