@@ -21,8 +21,8 @@ object IntentDispatcher {
 
     const val PKG_NUM = "ru.yourok.num"
     const val PKG_SMARTTUBE = "org.smarttube.stable"
-    const val PKG_LAMPA = "ru.yourok.lampa"
-    const val PKG_LAZYMEDIA = "com.laxymedia.deluxe"
+    const val PKG_LAMPA = "top.rootu.lamps"
+    const val PKG_LAZYMEDIA = "com.lazycatsoftware.lmd"
 
     private val TARGET_APPS = listOf(
         TargetApp(PKG_NUM, Intent.ACTION_VIEW, "NUM"),

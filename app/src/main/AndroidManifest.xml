@@ -12,8 +12,8 @@
     <queries>
         <package android:name="ru.yourok.num" />
         <package android:name="org.smarttube.stable" />
-        <package android:name="ru.yourok.lampa" />
-        <package android:name="com.laxymedia.deluxe" />
+        <package android:name="top.rootu.lamps" />
+        <package android:name="com.lazycatsoftware.lmd" />
         <package android:name="com.google.android.googlequicksearchbox" />
         <package android:name="com.google.android.tts" />
         <package android:name="com.google.android.apps.gsa" />

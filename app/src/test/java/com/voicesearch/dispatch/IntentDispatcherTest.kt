@@ -59,8 +59,8 @@ class IntentDispatcherTest {
     private fun stubAllPackagesInstalled() {
         stubPackageInstalled("ru.yourok.num")
         stubPackageInstalled("org.smarttube.stable")
-        stubPackageInstalled("ru.yourok.lampa")
-        stubPackageInstalled("com.laxymedia.deluxe")
+        stubPackageInstalled("top.rootu.lamps")
+        stubPackageInstalled("com.lazycatsoftware.lmd")
     }
 
     private fun stubResolveActivitySuccess() {
@@ -256,13 +256,13 @@ class IntentDispatcherTest {
 
     @Test
     fun getAllApps_lampaUsesActionSearch() {
-        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.lampa" }
+        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "top.rootu.lamps" }
         assertEquals(Intent.ACTION_SEARCH, lampa.searchAction)
     }
 
     @Test
     fun getAllApps_lazyMediaUsesActionSearch() {
-        val lazyMedia = IntentDispatcher.getAllApps().first { it.packageName == "com.laxymedia.deluxe" }
+        val lazyMedia = IntentDispatcher.getAllApps().first { it.packageName == "com.lazycatsoftware.lmd" }
         assertEquals(Intent.ACTION_SEARCH, lazyMedia.searchAction)
     }
 
@@ -289,13 +289,13 @@ class IntentDispatcherTest {
 
     @Test
     fun getAllApps_lampaHasNoDataUriTemplate() {
-        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.lampa" }
+        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "top.rootu.lamps" }
         assertNull(lampa.dataUriTemplate)
     }
 
     @Test
     fun getAllApps_lazyMediaHasNoDataUriTemplate() {
-        val lazyMedia = IntentDispatcher.getAllApps().first { it.packageName == "com.laxymedia.deluxe" }
+        val lazyMedia = IntentDispatcher.getAllApps().first { it.packageName == "com.lazycatsoftware.lmd" }
         assertNull(lazyMedia.dataUriTemplate)
     }
 
@@ -323,8 +323,8 @@ class IntentDispatcherTest {
     fun getSearchableApps_skipsNotInstalled() {
         stubPackageNotInstalled("ru.yourok.num")
         stubPackageInstalled("org.smarttube.stable")
-        stubPackageInstalled("ru.yourok.lampa")
-        stubPackageInstalled("com.laxymedia.deluxe")
+        stubPackageInstalled("top.rootu.lamps")
+        stubPackageInstalled("com.lazycatsoftware.lmd")
         stubResolveActivitySuccess()
 
         val searchable = IntentDispatcher.getSearchableApps(context)
@@ -346,8 +346,8 @@ class IntentDispatcherTest {
     fun getInstalledApps_noneInstalled_returnsZeroApps() {
         stubPackageNotInstalled("ru.yourok.num")
         stubPackageNotInstalled("org.smarttube.stable")
-        stubPackageNotInstalled("ru.yourok.lampa")
-        stubPackageNotInstalled("com.laxymedia.deluxe")
+        stubPackageNotInstalled("top.rootu.lamps")
+        stubPackageNotInstalled("com.lazycatsoftware.lmd")
 
         val installed = IntentDispatcher.getInstalledApps(context)
         assertEquals(0, installed.size)
@@ -455,7 +455,7 @@ class IntentDispatcherTest {
 
     @Test
     fun launchWithTmdb_lampaIgnoresTmdb_delegatesToLaunch() {
-        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.lampa" }
+        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "top.rootu.lamps" }
         stubPackageInstalled(lampa.packageName)
         stubResolveActivitySuccess()
 
