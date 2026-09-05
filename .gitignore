@@ -18,25 +18,10 @@ local.properties
 .env
 *.env
 
-# OpenCode process files (local only)
-PURPOSE.md
-TASKS.md
-TEAM.md
-CHAIN.md
-CONTINUITY.md
-
 # OpenCode runtime (not project files)
-.opencode/
-execution/
-AGENTS.md
-PROCESS.md
-FIRST_README.md
-opencode.jsonc
-goals/
-docs/
-vendor/
 dialog_golosovoy_poisk_projector.md
-requirements.txt
+# Пересоздаётся opencode и содержит живой TMDB-ключ.
+CONTINUITY.md
 
 # Template specs
 specs/opencode-*
@@ -54,8 +39,19 @@ __pycache__/
 .venv/
 
 # Misc
+.scratch/
 tmp/
 .snapshots/
 *.hprof
 captures/
-observations.jsonl
+
+# Обвязка из template-cc: нужна локально, версионируется в шаблоне.
+/.agents/skills
+/.claude/settings.json
+/.claude/skills
+/.claude/settings.local.json
+/.codex/hooks.json
+/CLAUDE.md
+/WORKFLOW.md
+/docs/agents
+/skills-lock.json
