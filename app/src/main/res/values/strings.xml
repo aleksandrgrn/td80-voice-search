@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Голосовой поиск</string>
-    <string name="accessibility_service_description">Перехват кнопки голосового поиска для запуска приложения Голосовой поиск</string>
-    <string name="accessibility_service_label">Голосовой поиск — перехват кнопки</string>
 
     <!-- Search UI -->
     <string name="search_hint">Поиск фильмов и сериалов…</string>
