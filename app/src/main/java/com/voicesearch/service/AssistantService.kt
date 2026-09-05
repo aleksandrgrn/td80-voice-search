@@ -20,6 +20,11 @@ class AssistantService : AccessibilityService() {
         @Volatile
         var isRunning: Boolean = false
             private set
+
+        /** Live instance reference for NumSearchHelper to access rootInActiveWindow. */
+        @Volatile
+        var instance: AssistantService? = null
+            private set
     }
 
     private var lastLaunchTime = 0L
@@ -28,13 +33,20 @@ class AssistantService : AccessibilityService() {
         super.onServiceConnected()
 
         // P0 FIX: Обязательно присвоение — иначе setServiceInfo() не вызовется
+        // P1 FIX: TYPE_WINDOW_STATE_CHANGED + TYPE_WINDOW_CONTENT_CHANGED нужны
+        // для инвалидации кэша AccessibilityInteractionClient при смене окна
+        // (без них rootInActiveWindow даёт stale/disconnected nodes)
         serviceInfo = serviceInfo.apply {
-            eventTypes = AccessibilityEvent.TYPE_VIEW_FOCUSED
-            flags = flags or AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS
+            eventTypes = AccessibilityEvent.TYPE_VIEW_FOCUSED or
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED or
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+            flags = flags or AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS or
+                AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS
             feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
         }
 
         isRunning = true
+        instance = this
         Log.i(TAG, "AssistantService connected, key filtering enabled")
     }
 
@@ -99,7 +111,18 @@ class AssistantService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Не используется — мы только перехватываем key events
+        // P1: Window/content events now received for proper cache invalidation.
+        // Log window state changes for diagnostics only (no functional logic needed).
+        if (event != null && BuildConfig.DEBUG) {
+            when (event.eventType) {
+                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
+                    Log.d(TAG, "A11y: window state changed pkg=${event.packageName} cls=${event.className}")
+                }
+                AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED -> {
+                    // Too verbose to log every content change — skip
+                }
+            }
+        }
     }
 
     override fun onInterrupt() {
@@ -108,6 +131,7 @@ class AssistantService : AccessibilityService() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         isRunning = false
+        instance = null
         Log.i(TAG, "AssistantService unbound")
         return super.onUnbind(intent)
     }
@@ -115,6 +139,7 @@ class AssistantService : AccessibilityService() {
     override fun onDestroy() {
         super.onDestroy()
         isRunning = false
+        instance = null
         Log.w(TAG, "AssistantService destroyed")
     }
 }

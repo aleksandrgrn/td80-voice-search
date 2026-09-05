@@ -26,6 +26,7 @@ import com.voicesearch.BuildConfig
 import com.voicesearch.R
 import com.voicesearch.dispatch.IntentDispatcher
 import com.voicesearch.dispatch.LaunchResult
+import com.voicesearch.dispatch.NumSearchHelper
 import com.voicesearch.databinding.ActivitySearchBinding
 import com.voicesearch.provider.TmdbSearchProvider
 import com.voicesearch.service.AssistantService
@@ -611,8 +612,15 @@ class SearchActivity : AppCompatActivity() {
                         Toast.makeText(this, R.string.launch_empty_query, Toast.LENGTH_LONG).show()
                         return@setOnClickListener
                     }
-                    val result = IntentDispatcher.launch(this, app, query)
-                    handleLaunchResult(result, app.displayName)
+
+                    if (packageName == "ru.yourok.num") {
+                        // NUM doesn't support text search via intent — use accessibility automation
+                        val result = NumSearchHelper.launchAndSearch(this@SearchActivity, query)
+                        handleLaunchResult(result, app.displayName)
+                    } else {
+                        val result = IntentDispatcher.launch(this, app, query)
+                        handleLaunchResult(result, app.displayName)
+                    }
                 }
             } else {
                 button.text = app?.displayName ?: packageName

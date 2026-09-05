@@ -2,9 +2,12 @@ package com.voicesearch.dispatch
 
 import android.app.SearchManager
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -13,6 +16,8 @@ import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -27,6 +32,8 @@ import org.junit.Test
  * - LaunchResult branching logic
  * - PackageManager interaction flow
  * - getSearchableApps filtering
+ * - dataUriTemplate configuration
+ * - launchWithTmdb() TMDB deep link logic
  */
 class IntentDispatcherTest {
 
@@ -57,7 +64,12 @@ class IntentDispatcherTest {
     }
 
     private fun stubResolveActivitySuccess() {
-        every { packageManager.resolveActivity(any(), ofType<Int>()) } returns mockk()
+        val activityInfo = ActivityInfo()
+        activityInfo.packageName = "com.test"
+        activityInfo.name = "com.test.SearchActivity"
+        val resolveInfo = ResolveInfo()
+        resolveInfo.activityInfo = activityInfo
+        every { packageManager.resolveActivity(any(), ofType<Int>()) } returns resolveInfo
     }
 
     private fun stubResolveActivityNull() {
@@ -195,6 +207,20 @@ class IntentDispatcherTest {
         verify { packageManager.resolveActivity(any(), ofType<Int>()) }
     }
 
+    @Test
+    fun launch_setsExplicitComponent_afterResolve() {
+        val app = IntentDispatcher.getAllApps().first()
+        stubPackageInstalled(app.packageName)
+        stubResolveActivitySuccess()
+
+        IntentDispatcher.launch(context, app, "Матрица")
+
+        verifyOrder {
+            packageManager.resolveActivity(any(), ofType<Int>())
+            context.startActivity(any())
+        }
+    }
+
     // ===== getAllApps() tests =====
 
     @Test
@@ -204,29 +230,73 @@ class IntentDispatcherTest {
     }
 
     @Test
-    fun getAllApps_smartTubeHasMediaFocus() {
+    fun getAllApps_smartTubeHasNoMediaFocus() {
         val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
-        assertEquals("movie", smartTube.mediaFocus)
+        assertEquals(null, smartTube.mediaFocus)
     }
 
     @Test
-    fun getAllApps_regularAppsHaveNoMediaFocus() {
-        val regularApps = IntentDispatcher.getAllApps().filter { it.packageName != "org.smarttube.stable" }
-        assertTrue("All non-SmartTube apps should have null mediaFocus",
-            regularApps.all { it.mediaFocus == null })
+    fun getAllApps_allAppsHaveNoMediaFocus() {
+        val apps = IntentDispatcher.getAllApps()
+        assertTrue("All apps should have null mediaFocus",
+            apps.all { it.mediaFocus == null })
     }
 
     @Test
-    fun getAllApps_smartTubeUsesMediaPlayFromSearch() {
+    fun getAllApps_smartTubeUsesActionView() {
         val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
-        assertEquals("android.media.action.MEDIA_PLAY_FROM_SEARCH", smartTube.searchAction)
+        assertEquals(Intent.ACTION_VIEW, smartTube.searchAction)
     }
 
     @Test
-    fun getAllApps_otherAppsUseActionSearch() {
-        val others = IntentDispatcher.getAllApps().filter { it.packageName != "org.smarttube.stable" }
-        assertTrue("All non-SmartTube apps should use ACTION_SEARCH",
-            others.all { it.searchAction == Intent.ACTION_SEARCH })
+    fun getAllApps_numUsesActionView() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        assertEquals(Intent.ACTION_VIEW, num.searchAction)
+    }
+
+    @Test
+    fun getAllApps_lampaUsesActionSearch() {
+        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.lampa" }
+        assertEquals(Intent.ACTION_SEARCH, lampa.searchAction)
+    }
+
+    @Test
+    fun getAllApps_lazyMediaUsesActionSearch() {
+        val lazyMedia = IntentDispatcher.getAllApps().first { it.packageName == "com.laxymedia.deluxe" }
+        assertEquals(Intent.ACTION_SEARCH, lazyMedia.searchAction)
+    }
+
+    // ===== dataUriTemplate tests =====
+
+    @Test
+    fun getAllApps_smartTubeHasDataUriTemplate() {
+        val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
+        assertNotNull(smartTube.dataUriTemplate)
+        assertTrue(smartTube.dataUriTemplate!!.contains("{query}"))
+    }
+
+    @Test
+    fun getAllApps_smartTubeDataUriTemplate_isYouTubeResults() {
+        val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
+        assertEquals("https://www.youtube.com/results?search_query={query}", smartTube.dataUriTemplate)
+    }
+
+    @Test
+    fun getAllApps_numHasNoDataUriTemplate() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        assertNull(num.dataUriTemplate)
+    }
+
+    @Test
+    fun getAllApps_lampaHasNoDataUriTemplate() {
+        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.lampa" }
+        assertNull(lampa.dataUriTemplate)
+    }
+
+    @Test
+    fun getAllApps_lazyMediaHasNoDataUriTemplate() {
+        val lazyMedia = IntentDispatcher.getAllApps().first { it.packageName == "com.laxymedia.deluxe" }
+        assertNull(lazyMedia.dataUriTemplate)
     }
 
     // ===== getSearchableApps() tests =====
@@ -281,5 +351,158 @@ class IntentDispatcherTest {
 
         val installed = IntentDispatcher.getInstalledApps(context)
         assertEquals(0, installed.size)
+    }
+
+    // ===== launchWithTmdb() — NUM with TMDB deep link =====
+
+    @Test
+    fun launchWithTmdb_numWithTmdbId_returnsSuccess() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", "603", "movie")
+        assertEquals(LaunchResult.SUCCESS, result)
+        verify { context.startActivity(any()) }
+    }
+
+    @Test
+    fun launchWithTmdb_numWithoutTmdbId_fallsThroughToLaunch() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+
+        // Without TMDB info, NUM falls through to launch() which uses ACTION_VIEW without data URI
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", null, null)
+        // NUM without dataUriTemplate and without TMDB → launch() uses ACTION_VIEW with no data → resolveActivity may fail
+        // But we stubbed it to succeed, so it should work
+        assertEquals(LaunchResult.SUCCESS, result)
+    }
+
+    @Test
+    fun launchWithTmdb_numWithNullTmdbId_fallsThroughToLaunch() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", null, "movie")
+        assertEquals(LaunchResult.SUCCESS, result)
+    }
+
+    @Test
+    fun launchWithTmdb_numWithNullTmdbType_fallsThroughToLaunch() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", "603", null)
+        assertEquals(LaunchResult.SUCCESS, result)
+    }
+
+    @Test
+    fun launchWithTmdb_numNotInstalled_returnsNoHandler() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageNotInstalled(num.packageName)
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", "603", "movie")
+        assertEquals(LaunchResult.NO_HANDLER, result)
+    }
+
+    @Test
+    fun launchWithTmdb_numTmdbResolveFails_returnsNoHandler() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivityNull()
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", "603", "movie")
+        assertEquals(LaunchResult.NO_HANDLER, result)
+    }
+
+    @Test
+    fun launchWithTmdb_numTmdbActivityNotFound_returnsNoHandler() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+        every { context.startActivity(any()) } throws ActivityNotFoundException()
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", "603", "movie")
+        assertEquals(LaunchResult.NO_HANDLER, result)
+    }
+
+    @Test
+    fun launchWithTmdb_numTmdbGeneralException_returnsError() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+        every { context.startActivity(any()) } throws RuntimeException("boom")
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Матрица", "603", "movie")
+        assertEquals(LaunchResult.ERROR, result)
+    }
+
+    // ===== launchWithTmdb() — SmartTube falls through to launch() =====
+
+    @Test
+    fun launchWithTmdb_smartTubeIgnoresTmdb_delegatesToLaunch() {
+        val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
+        stubPackageInstalled(smartTube.packageName)
+        stubResolveActivitySuccess()
+
+        // SmartTube should use dataUriTemplate regardless of TMDB params
+        val result = IntentDispatcher.launchWithTmdb(context, smartTube, "Матрица", "603", "movie")
+        assertEquals(LaunchResult.SUCCESS, result)
+    }
+
+    @Test
+    fun launchWithTmdb_lampaIgnoresTmdb_delegatesToLaunch() {
+        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.lampa" }
+        stubPackageInstalled(lampa.packageName)
+        stubResolveActivitySuccess()
+
+        val result = IntentDispatcher.launchWithTmdb(context, lampa, "Матрица", "603", "movie")
+        assertEquals(LaunchResult.SUCCESS, result)
+    }
+
+    // ===== launchWithTmdb() — blank query =====
+
+    @Test
+    fun launchWithTmdb_blankQuery_returnsNoHandler() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        val result = IntentDispatcher.launchWithTmdb(context, num, "", "603", "movie")
+        assertEquals(LaunchResult.NO_HANDLER, result)
+    }
+
+    @Test
+    fun launchWithTmdb_whitespaceQuery_returnsNoHandler() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        val result = IntentDispatcher.launchWithTmdb(context, num, "   ", "603", "movie")
+        assertEquals(LaunchResult.NO_HANDLER, result)
+    }
+
+    // ===== launchWithTmdb() — interaction flow for NUM with TMDB =====
+
+    @Test
+    fun launchWithTmdb_numWithTmdb_callsResolveBeforeStart() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+
+        IntentDispatcher.launchWithTmdb(context, num, "Матрица", "603", "movie")
+
+        verifyOrder {
+            packageManager.getPackageInfo(num.packageName, 0)
+            packageManager.resolveActivity(any(), ofType<Int>())
+            context.startActivity(any())
+        }
+    }
+
+    @Test
+    fun launchWithTmdb_numTvShow_returnsSuccess() {
+        val num = IntentDispatcher.getAllApps().first { it.packageName == "ru.yourok.num" }
+        stubPackageInstalled(num.packageName)
+        stubResolveActivitySuccess()
+
+        val result = IntentDispatcher.launchWithTmdb(context, num, "Во все тяжкие", "1396", "tv")
+        assertEquals(LaunchResult.SUCCESS, result)
     }
 }

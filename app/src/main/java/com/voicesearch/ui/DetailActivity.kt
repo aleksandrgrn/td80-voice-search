@@ -103,10 +103,11 @@ class DetailActivity : AppCompatActivity() {
         }
 
         // App buttons
-        setupAppButtons(title)
+        val tmdbId = intent.getStringExtra(EXTRA_TMDB_ID)
+        setupAppButtons(title, tmdbId, type)
     }
 
-    private fun setupAppButtons(query: String) {
+    private fun setupAppButtons(query: String, tmdbId: String?, tmdbType: String?) {
         val allApps = IntentDispatcher.getAllApps()
         val searchableApps = IntentDispatcher.getSearchableApps(this)
         val searchablePackages = searchableApps.map { it.packageName }.toSet()
@@ -128,7 +129,7 @@ class DetailActivity : AppCompatActivity() {
                         Toast.makeText(this, R.string.launch_empty_query, Toast.LENGTH_LONG).show()
                         return@setOnClickListener
                     }
-                    val result = IntentDispatcher.launch(this, app, query)
+                    val result = IntentDispatcher.launchWithTmdb(this, app, query, tmdbId, tmdbType)
                     handleLaunchResult(result, app.displayName)
                 }
             } else {
