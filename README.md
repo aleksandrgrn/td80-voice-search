@@ -49,7 +49,7 @@ Provider-based: `SearchProvider` интерфейс → `TmdbSearchProvider` (п
 | Модель | Droidlogic TD80 Pro |
 | Android | 13 (API 33) |
 | Архитектура | armeabi-v7a |
-| ADB | 192.168.32.195:42209 |
+| ADB | адрес спрашивать: порт меняется после ребута, IP — после аренды DHCP |
 
 ## Статус
 

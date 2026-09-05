@@ -19,7 +19,7 @@
 | Android | 13 (API 33) |
 | Архитектура | armeabi-v7a |
 | Характеристики | tv, nosdcard, leanback |
-| ADB | 192.168.32.195:42209 |
+| ADB | адрес спрашивать: порт меняется после ребута, IP — после аренды DHCP |
 | Speech Services | com.google.android.tts (установлен и работает) |
 
 ---
