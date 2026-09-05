@@ -594,10 +594,10 @@ class SearchActivity : AppCompatActivity() {
         val searchablePackages = searchableApps.map { it.packageName }.toSet()
 
         val buttonAppMap = mapOf(
-            binding.btnNum to "ru.yourok.num",
-            binding.btnSmartTube to "org.smarttube.stable",
-            binding.btnLampa to "ru.yourok.lampa",
-            binding.btnLazyMedia to "com.laxymedia.deluxe",
+            binding.btnNum to IntentDispatcher.PKG_NUM,
+            binding.btnSmartTube to IntentDispatcher.PKG_SMARTTUBE,
+            binding.btnLampa to IntentDispatcher.PKG_LAMPA,
+            binding.btnLazyMedia to IntentDispatcher.PKG_LAZYMEDIA,
         )
 
         buttonAppMap.forEach { (button, packageName) ->

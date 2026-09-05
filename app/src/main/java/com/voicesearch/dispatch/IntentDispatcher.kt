@@ -19,12 +19,17 @@ enum class LaunchResult {
 
 object IntentDispatcher {
 
+    const val PKG_NUM = "ru.yourok.num"
+    const val PKG_SMARTTUBE = "org.smarttube.stable"
+    const val PKG_LAMPA = "ru.yourok.lampa"
+    const val PKG_LAZYMEDIA = "com.laxymedia.deluxe"
+
     private val TARGET_APPS = listOf(
-        TargetApp("ru.yourok.num", Intent.ACTION_VIEW, "NUM"),
-        TargetApp("org.smarttube.stable", Intent.ACTION_VIEW, "SmartTube",
+        TargetApp(PKG_NUM, Intent.ACTION_VIEW, "NUM"),
+        TargetApp(PKG_SMARTTUBE, Intent.ACTION_VIEW, "SmartTube",
             dataUriTemplate = "https://www.youtube.com/results?search_query={query}"),
-        TargetApp("ru.yourok.lampa", Intent.ACTION_SEARCH, "Lampa"),
-        TargetApp("com.laxymedia.deluxe", Intent.ACTION_SEARCH, "LazyMediaDeluxe"),
+        TargetApp(PKG_LAMPA, Intent.ACTION_SEARCH, "Lampa"),
+        TargetApp(PKG_LAZYMEDIA, Intent.ACTION_SEARCH, "LazyMediaDeluxe"),
     )
 
     /** Test URI used by getSearchableApps() for NUM — NUM resolves ACTION_VIEW for TMDB URLs. */
@@ -97,7 +102,7 @@ object IntentDispatcher {
         if (query.isBlank()) return LaunchResult.NO_HANDLER
 
         // NUM with TMDB info → deep link
-        if (app.packageName == "ru.yourok.num" && !tmdbId.isNullOrBlank() && !tmdbType.isNullOrBlank()) {
+        if (app.packageName == PKG_NUM && !tmdbId.isNullOrBlank() && !tmdbType.isNullOrBlank()) {
             val pm = context.packageManager
 
             try {
@@ -167,7 +172,7 @@ object IntentDispatcher {
                         val encodedQuery = URLEncoder.encode("test", "UTF-8")
                         val uriString = app.dataUriTemplate.replace("{query}", encodedQuery)
                         data = Uri.parse(uriString)
-                    } else if (app.packageName == "ru.yourok.num") {
+                    } else if (app.packageName == PKG_NUM) {
                         // NUM uses ACTION_VIEW with TMDB URI — test with a generic TMDB URI
                         data = Uri.parse(NUM_TEST_URI)
                     }
