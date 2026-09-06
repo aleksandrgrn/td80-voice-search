@@ -38,8 +38,13 @@ class TmdbSearchProvider(
     private val genreMutex = Mutex()
     private var genreCache: Map<Int, String>? = null
 
+    private val isKeyConfigured: Boolean
+        get() = apiKey.isNotBlank() &&
+            apiKey != "PLACEHOLDER" &&
+            apiKey != "PLACEHOLDER_GET_YOUR_KEY"
+
     override suspend fun search(query: String): List<SearchResult> {
-        if (apiKey.isBlank() || apiKey == "PLACEHOLDER" || apiKey == "PLACEHOLDER_GET_YOUR_KEY") {
+        if (!isKeyConfigured) {
             Log.w(TAG, "TMDB API key is not configured — skipping search")
             throw TmdbException.ApiKeyInvalid()
         }
@@ -52,6 +57,19 @@ class TmdbSearchProvider(
 
         Log.d(TAG, "TMDB search '$query' → ${results.size} results (API total: ${response.totalResults})")
         return results
+    }
+
+    /**
+     * Прогревает кэш жанров заранее, чтобы первый поиск не ждал два лишних запроса.
+     * Безопасен для вызова из UI: не бросает и молча ничего не делает без ключа.
+     */
+    suspend fun prefetchGenres() {
+        if (!isKeyConfigured) return
+        try {
+            ensureGenreCache()
+        } catch (e: Exception) {
+            Log.w(TAG, "Genre prefetch failed", e)
+        }
     }
 
     private suspend fun ensureGenreCache(): Map<Int, String> {

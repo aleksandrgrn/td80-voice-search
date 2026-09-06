@@ -316,4 +316,35 @@ class TmdbSearchProviderTest {
 
         assertTrue("cancelAndJoin took ${elapsed}ms, expected < 1500", elapsed < 1500)
     }
+
+    @Test
+    fun `prefetchGenres warms the cache so the next search only issues the search request`() = runBlocking {
+        enqueueGenreResponses()
+
+        provider.prefetchGenres()
+        assertEquals(2, server.requestCount)
+
+        server.enqueue(MockResponse().setBody("""
+            {"page":1,"results":[{"id":1,"media_type":"movie","title":"Test","genre_ids":[28]}],"total_pages":1,"total_results":1}
+        """.trimIndent()))
+
+        val results = provider.search("test")
+
+        // Всего три запроса: два жанровых из прогрева и один поисковый
+        assertEquals(3, server.requestCount)
+        assertEquals("Боевик", results[0].metadata["genre"])
+    }
+
+    @Test
+    fun `prefetchGenres makes no requests when apiKey is not configured`() = runBlocking {
+        val blankProvider = TmdbSearchProvider(
+            apiKey = "",
+            baseUrl = server.url("/3/").toString(),
+            client = OkHttpClient()
+        )
+
+        blankProvider.prefetchGenres()
+
+        assertEquals(0, server.requestCount)
+    }
 }

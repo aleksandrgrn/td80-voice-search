@@ -72,6 +72,8 @@ class SearchActivity : AppCompatActivity() {
 
         // TMDB provider
         tmdbProvider = TmdbSearchProvider(BuildConfig.TMDB_API_KEY)
+        // Жанры не зависят от запроса — тянем их, пока пользователь диктует
+        lifecycleScope.launch { tmdbProvider.prefetchGenres() }
 
         // SpeechRecognizer initialization + voice button setup
         // Try standard check first, then try explicit component names for TV devices
