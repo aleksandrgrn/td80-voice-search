@@ -19,7 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.voicesearch.BuildConfig
 import com.voicesearch.R
@@ -71,12 +71,6 @@ class SearchActivity : AppCompatActivity() {
         // TMDB provider
         tmdbProvider = TmdbSearchProvider(BuildConfig.TMDB_API_KEY)
 
-        // Debug simulate button
-        binding.btnSimulateVoice.visibility = if (BuildConfig.DEBUG) android.view.View.VISIBLE else android.view.View.GONE
-        binding.btnSimulateVoice.setOnClickListener {
-            simulateVoiceSearch()
-        }
-
         // SpeechRecognizer initialization + voice button setup
         // Try standard check first, then try explicit component names for TV devices
         // where AppsFilter may block SpeechRecognizer.isRecognitionAvailable()
@@ -125,9 +119,10 @@ class SearchActivity : AppCompatActivity() {
             onResultClick(result)
         }
         binding.resultsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@SearchActivity, LinearLayoutManager.HORIZONTAL, false)
+            layoutManager = GridLayoutManager(this@SearchActivity, 2, GridLayoutManager.HORIZONTAL, false)
             adapter = searchAdapter
-            addItemDecoration(HorizontalSpaceItemDecoration(12))
+            isFocusable = false
+            addItemDecoration(GridSpaceItemDecoration((12 * resources.displayMetrics.density).toInt()))
         }
 
         // App buttons
@@ -366,13 +361,6 @@ class SearchActivity : AppCompatActivity() {
         // hint сбрасывается вызывающим кодом при выходе из listening
     }
 
-    private fun simulateVoiceSearch() {
-        val simulatedText = "Матрица"
-        Log.i(TAG, "Debug: simulating voice search with query='$simulatedText'")
-        binding.searchInput.setText(simulatedText)
-        performSearch()
-    }
-
     private fun showMicRationaleDialog() {
         AlertDialog.Builder(this)
             .setTitle(R.string.permission_rationale_title)
@@ -426,7 +414,14 @@ class SearchActivity : AppCompatActivity() {
         searchJob = lifecycleScope.launch {
             try {
                 val results = tmdbProvider.search(query)
-                searchAdapter.submitList(results)
+                searchAdapter.submitList(results) {
+                    if (results.isNotEmpty()) {
+                        binding.resultsRecyclerView.post {
+                            binding.resultsRecyclerView
+                                .findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                        }
+                    }
+                }
 
                 // Dynamic provider label from provider
                 binding.providerLabel.text = tmdbProvider.displayName
@@ -531,14 +526,16 @@ class SearchActivity : AppCompatActivity() {
 
     // ===== Item decoration =====
 
-    private class HorizontalSpaceItemDecoration(private val space: Int) : RecyclerView.ItemDecoration() {
+    private class GridSpaceItemDecoration(private val spacePx: Int) : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(
             outRect: Rect,
             view: android.view.View,
             parent: RecyclerView,
             state: RecyclerView.State
         ) {
-            outRect.right = space
+            outRect.right = spacePx
+            if ((view.layoutParams as GridLayoutManager.LayoutParams).spanIndex == 0)
+                outRect.bottom = spacePx
         }
     }
 }

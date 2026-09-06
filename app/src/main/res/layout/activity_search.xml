@@ -26,6 +26,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <ImageButton
+            android:id="@+id/voiceButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_mic"
+            android:background="@drawable/bg_voice_button_selector"
+            android:contentDescription="@string/voice_search_button"
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:nextFocusRight="@id/searchInput">
+
+            <requestFocus />
+
+        </ImageButton>
+
         <EditText
             android:id="@+id/searchInput"
             android:layout_width="0dp"
@@ -39,33 +54,7 @@
             android:singleLine="true"
             android:imeOptions="actionSearch"
             android:inputType="text"
-            android:nextFocusDown="@id/resultsRecyclerView"
-            android:nextFocusRight="@id/voiceButton" />
-
-        <ImageButton
-            android:id="@+id/voiceButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_mic"
-            android:background="@drawable/bg_voice_button_selector"
-            android:contentDescription="@string/voice_search_button"
-            android:scaleType="centerInside"
-            android:padding="8dp"
-            android:nextFocusLeft="@id/searchInput"
-            android:nextFocusDown="@id/resultsRecyclerView" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnSimulateVoice"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:text="@string/simulate_voice"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            android:background="@drawable/bg_app_button_selector"
-            android:visibility="gone"
-            android:nextFocusLeft="@id/voiceButton"
-            android:nextFocusDown="@id/resultsRecyclerView"
-            android:nextFocusUp="@id/searchInput" />
+            android:nextFocusLeft="@id/voiceButton" />
 
     </LinearLayout>
 
@@ -90,7 +79,6 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:descendantFocusability="afterDescendants"
-        android:focusable="false"
         app:layout_constraintTop_toBottomOf="@id/providerLabel"
         app:layout_constraintBottom_toTopOf="@id/appButtonsContainer"
         app:layout_constraintStart_toStartOf="parent"
@@ -153,7 +141,6 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/resultsRecyclerView"
             android:nextFocusRight="@id/btnSmartTube" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -166,7 +153,6 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/resultsRecyclerView"
             android:nextFocusLeft="@id/btnNum"
             android:nextFocusRight="@id/btnLampa" />
 
@@ -180,7 +166,6 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/resultsRecyclerView"
             android:nextFocusLeft="@id/btnSmartTube"
             android:nextFocusRight="@id/btnLazyMedia" />
 
@@ -193,7 +178,6 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/resultsRecyclerView"
             android:nextFocusLeft="@id/btnLampa" />
 
     </LinearLayout>
