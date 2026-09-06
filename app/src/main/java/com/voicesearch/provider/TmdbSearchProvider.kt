@@ -39,7 +39,7 @@ class TmdbSearchProvider(
     override suspend fun search(query: String): List<SearchResult> {
         if (apiKey.isBlank() || apiKey == "PLACEHOLDER" || apiKey == "PLACEHOLDER_GET_YOUR_KEY") {
             Log.w(TAG, "TMDB API key is not configured — skipping search")
-            return emptyList()
+            throw TmdbException.ApiKeyInvalid()
         }
 
         val cache = ensureGenreCache()

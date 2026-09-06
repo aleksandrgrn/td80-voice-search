@@ -101,42 +101,51 @@ class TmdbSearchProviderTest {
     // ===== PLACEHOLDER API key =====
 
     @Test
-    fun `search returns empty list when apiKey is PLACEHOLDER`() = runBlocking {
+    fun `search throws ApiKeyInvalid when apiKey is PLACEHOLDER`() = runBlocking {
         val placeholderProvider = TmdbSearchProvider(
             apiKey = "PLACEHOLDER",
             baseUrl = server.url("/3/").toString(),
             client = OkHttpClient()
         )
 
-        val results = placeholderProvider.search("test")
-
-        assertTrue(results.isEmpty())
+        try {
+            placeholderProvider.search("test")
+            fail("Expected TmdbException.ApiKeyInvalid")
+        } catch (e: TmdbException.ApiKeyInvalid) {
+            // Expected
+        }
     }
 
     @Test
-    fun `search returns empty list when apiKey is PLACEHOLDER_GET_YOUR_KEY`() = runBlocking {
+    fun `search throws ApiKeyInvalid when apiKey is PLACEHOLDER_GET_YOUR_KEY`() = runBlocking {
         val placeholderProvider = TmdbSearchProvider(
             apiKey = "PLACEHOLDER_GET_YOUR_KEY",
             baseUrl = server.url("/3/").toString(),
             client = OkHttpClient()
         )
 
-        val results = placeholderProvider.search("test")
-
-        assertTrue(results.isEmpty())
+        try {
+            placeholderProvider.search("test")
+            fail("Expected TmdbException.ApiKeyInvalid")
+        } catch (e: TmdbException.ApiKeyInvalid) {
+            // Expected
+        }
     }
 
     @Test
-    fun `search returns empty list when apiKey is blank`() = runBlocking {
+    fun `search throws ApiKeyInvalid when apiKey is blank`() = runBlocking {
         val blankProvider = TmdbSearchProvider(
             apiKey = "",
             baseUrl = server.url("/3/").toString(),
             client = OkHttpClient()
         )
 
-        val results = blankProvider.search("test")
-
-        assertTrue(results.isEmpty())
+        try {
+            blankProvider.search("test")
+            fail("Expected TmdbException.ApiKeyInvalid")
+        } catch (e: TmdbException.ApiKeyInvalid) {
+            // Expected
+        }
     }
 
     // ===== 401 error =====

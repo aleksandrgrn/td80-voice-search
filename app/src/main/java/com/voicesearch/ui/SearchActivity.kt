@@ -27,6 +27,7 @@ import com.voicesearch.dispatch.IntentDispatcher
 import com.voicesearch.dispatch.LaunchResult
 import com.voicesearch.databinding.ActivitySearchBinding
 import com.voicesearch.provider.TmdbSearchProvider
+import com.voicesearch.provider.TmdbException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -433,6 +434,7 @@ class SearchActivity : AppCompatActivity() {
 
                 binding.searchProgressBar.visibility = android.view.View.GONE
                 if (results.isEmpty()) {
+                    binding.emptyStateText.setText(R.string.no_results)
                     binding.emptyStateText.visibility = android.view.View.VISIBLE
                     binding.resultsRecyclerView.visibility = android.view.View.GONE
                 } else {
@@ -442,11 +444,21 @@ class SearchActivity : AppCompatActivity() {
             } catch (e: CancellationException) {
                 // Не обновляем UI — Activity уничтожается
                 throw e
+            } catch (e: TmdbException.ApiKeyInvalid) {
+                Log.e(TAG, "Search failed: API key", e)
+                resultsQuery = null
+                searchAdapter.submitList(emptyList())
+                binding.searchProgressBar.visibility = android.view.View.GONE
+                binding.emptyStateText.setText(R.string.error_api_key)
+                binding.emptyStateText.visibility = android.view.View.VISIBLE
+                binding.resultsRecyclerView.visibility = android.view.View.GONE
+                binding.providerLabel.visibility = android.view.View.GONE
             } catch (e: Exception) {
                 Log.e(TAG, "Search failed", e)
                 resultsQuery = null
                 searchAdapter.submitList(emptyList())
                 binding.searchProgressBar.visibility = android.view.View.GONE
+                binding.emptyStateText.setText(R.string.error_search_failed)
                 binding.emptyStateText.visibility = android.view.View.VISIBLE
                 binding.resultsRecyclerView.visibility = android.view.View.GONE
                 binding.providerLabel.visibility = android.view.View.GONE
