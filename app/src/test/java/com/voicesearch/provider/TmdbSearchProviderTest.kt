@@ -1,5 +1,8 @@
 package com.voicesearch.provider
 
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -8,6 +11,8 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.util.concurrent.TimeUnit
+import kotlin.system.measureTimeMillis
 
 class TmdbSearchProviderTest {
 
@@ -291,5 +296,24 @@ class TmdbSearchProviderTest {
 
         assertEquals(6, server.requestCount)
         assertEquals("Боевик", results[0].metadata["genre"])
+    }
+
+    @Test
+    fun `cancelling the search cancels the in-flight HTTP call`() = runBlocking {
+        enqueueGenreResponses()
+        server.enqueue(
+            MockResponse()
+                .setBody("""{"page":1,"results":[],"total_pages":0,"total_results":0}""")
+                .setBodyDelay(5, TimeUnit.SECONDS)
+        )
+
+        val job = launch(Dispatchers.IO) { provider.search("slow") }
+
+        // Оба запроса жанров и сам поиск дошли до сервера — поиск висит на bodyDelay
+        repeat(3) { assertNotNull(server.takeRequest(5, TimeUnit.SECONDS)) }
+
+        val elapsed = measureTimeMillis { job.cancelAndJoin() }
+
+        assertTrue("cancelAndJoin took ${elapsed}ms, expected < 1500", elapsed < 1500)
     }
 }

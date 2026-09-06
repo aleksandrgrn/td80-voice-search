@@ -4,22 +4,24 @@ import android.util.Log
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.voicesearch.model.SearchResult
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class TmdbSearchProvider(
     private val apiKey: String,
     private val language: String = "ru-RU",
     private val baseUrl: String = "https://api.themoviedb.org/3/",
-    private val client: OkHttpClient = com.voicesearch.VoiceSearchApp.httpClient,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val client: OkHttpClient = com.voicesearch.VoiceSearchApp.httpClient
 ) : SearchProvider {
 
     override val id = "tmdb"
@@ -119,24 +121,42 @@ class TmdbSearchProvider(
         }
     }
 
-    private suspend fun executeGet(url: okhttp3.HttpUrl): String = withContext(ioDispatcher) {
+    private suspend fun executeGet(url: okhttp3.HttpUrl): String {
         val request = Request.Builder().url(url).build()
-        try {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    val code = response.code
-                    throw when (code) {
-                        401 -> TmdbException.ApiKeyInvalid()
-                        in 400..499 -> TmdbException.HttpError(code, "Client error")
-                        in 500..599 -> TmdbException.HttpError(code, "Server error")
-                        else -> TmdbException.HttpError(code, "Unexpected HTTP error")
+        val call = client.newCall(request)
+        return suspendCancellableCoroutine { cont ->
+            cont.invokeOnCancellation { call.cancel() }
+            call.enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    if (!cont.isActive) return
+                    cont.resumeWithException(TmdbException.NetworkError(e))
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    try {
+                        response.use {
+                            if (!it.isSuccessful) {
+                                val code = it.code
+                                throw when (code) {
+                                    401 -> TmdbException.ApiKeyInvalid()
+                                    in 400..499 -> TmdbException.HttpError(code, "Client error")
+                                    in 500..599 -> TmdbException.HttpError(code, "Server error")
+                                    else -> TmdbException.HttpError(code, "Unexpected HTTP error")
+                                }
+                            }
+                            val body = it.body?.string()
+                                ?: throw TmdbException.ParseError("Empty response body")
+                            cont.resume(body)
+                        }
+                    } catch (e: IOException) {
+                        if (!cont.isActive) return
+                        cont.resumeWithException(TmdbException.NetworkError(e))
+                    } catch (e: TmdbException) {
+                        if (!cont.isActive) return
+                        cont.resumeWithException(e)
                     }
                 }
-                response.body?.string()
-                    ?: throw TmdbException.ParseError("Empty response body")
-            }
-        } catch (e: IOException) {
-            throw TmdbException.NetworkError(e)
+            })
         }
     }
 
