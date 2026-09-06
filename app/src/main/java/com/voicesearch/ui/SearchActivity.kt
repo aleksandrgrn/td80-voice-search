@@ -45,6 +45,7 @@ class SearchActivity : AppCompatActivity() {
     private var isListening = false
     private var pendingVoiceStart = false
     private var searchJob: Job? = null
+    private var resultsQuery: String? = null
 
     private val requestAudioPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -400,6 +401,7 @@ class SearchActivity : AppCompatActivity() {
 
         // Cancel previous search
         searchJob?.cancel()
+        resultsQuery = null
 
         // Show loading
         binding.searchProgressBar.visibility = android.view.View.VISIBLE
@@ -415,6 +417,7 @@ class SearchActivity : AppCompatActivity() {
             try {
                 val results = tmdbProvider.search(query)
                 searchAdapter.submitList(results) {
+                    resultsQuery = query
                     if (results.isNotEmpty()) {
                         binding.resultsRecyclerView.post {
                             binding.resultsRecyclerView
@@ -441,6 +444,7 @@ class SearchActivity : AppCompatActivity() {
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Search failed", e)
+                resultsQuery = null
                 searchAdapter.submitList(emptyList())
                 binding.searchProgressBar.visibility = android.view.View.GONE
                 binding.emptyStateText.visibility = android.view.View.VISIBLE
@@ -497,10 +501,14 @@ class SearchActivity : AppCompatActivity() {
                         // Каталог NUM — тот же TMDB: открываем верхний результат,
                         // а не запускаем поиск заново.
                         val top = searchAdapter.currentList.firstOrNull()
+                        if (top == null || resultsQuery != query) {
+                            Toast.makeText(this, R.string.launch_no_results, Toast.LENGTH_LONG).show()
+                            return@setOnClickListener
+                        }
                         IntentDispatcher.launchWithTmdb(
                             this, app, query,
-                            top?.metadata?.get("tmdbId"),
-                            top?.metadata?.get("type")
+                            top.metadata["tmdbId"],
+                            top.metadata["type"]
                         )
                     } else {
                         IntentDispatcher.launch(this, app, query)

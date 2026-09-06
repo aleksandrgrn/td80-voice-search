@@ -105,6 +105,12 @@ class DetailActivity : AppCompatActivity() {
         // App buttons
         val tmdbId = intent.getStringExtra(EXTRA_TMDB_ID)
         setupAppButtons(title, tmdbId, type)
+
+        // Фокус на первую активную кнопку приложения: экран открывают ради запуска
+        // фильма, а не «Назад». Неактивные (неустановленные) кнопки пропускаем.
+        listOf(binding.btnNum, binding.btnSmartTube, binding.btnLampa, binding.btnLazyMedia)
+            .firstOrNull { it.isEnabled }
+            ?.requestFocus()
     }
 
     private fun setupAppButtons(query: String, tmdbId: String?, tmdbType: String?) {
