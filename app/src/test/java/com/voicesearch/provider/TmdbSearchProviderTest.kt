@@ -270,4 +270,26 @@ class TmdbSearchProviderTest {
         assertEquals(1, results.size)
         assertNull(results[0].metadata["genre"])
     }
+
+    @Test
+    fun `empty genre map is not cached and is refetched on next search`() = runBlocking {
+        // First search: both genre fetches fail → empty map, must NOT be cached
+        server.enqueue(MockResponse().setResponseCode(500))
+        server.enqueue(MockResponse().setResponseCode(500))
+        server.enqueue(MockResponse().setBody("""{"page":1,"results":[],"total_pages":0,"total_results":0}"""))
+
+        provider.search("first")
+        assertEquals(3, server.requestCount)
+
+        // Second search: genres succeed → 2 genre requests again, not served from cache
+        enqueueGenreResponses()
+        server.enqueue(MockResponse().setBody("""
+            {"page":1,"results":[{"id":1,"media_type":"movie","title":"Test","genre_ids":[28]}],"total_pages":1,"total_results":1}
+        """.trimIndent()))
+
+        val results = provider.search("second")
+
+        assertEquals(6, server.requestCount)
+        assertEquals("Боевик", results[0].metadata["genre"])
+    }
 }

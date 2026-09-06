@@ -22,6 +22,7 @@ class VoiceSearchApp : Application() {
          */
         val httpClient: OkHttpClient by lazy {
             OkHttpClient.Builder()
+                .callTimeout(30, TimeUnit.SECONDS)
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.SECONDS)
                 .writeTimeout(20, TimeUnit.SECONDS)

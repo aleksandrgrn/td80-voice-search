@@ -55,7 +55,7 @@ class TmdbSearchProvider(
     private suspend fun ensureGenreCache(): Map<Int, String> {
         genreCache?.let { return it }
         return genreMutex.withLock {
-            genreCache ?: fetchGenres().also { genreCache = it }
+            genreCache ?: fetchGenres().also { if (it.isNotEmpty()) genreCache = it }
         }
     }
 
