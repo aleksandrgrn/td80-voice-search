@@ -29,22 +29,6 @@ class SearchAdapter(
             LayoutInflater.from(parent.context), parent, false
         )
         val holder = ResultViewHolder(binding, onItemClick)
-        // Focus change animation: set once in onCreateViewHolder, not on every bind
-        binding.root.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                binding.root.animate()
-                    .scaleX(1.08f)
-                    .scaleY(1.08f)
-                    .setDuration(150)
-                    .start()
-            } else {
-                binding.root.animate()
-                    .scaleX(1.0f)
-                    .scaleY(1.0f)
-                    .setDuration(150)
-                    .start()
-            }
-        }
         return holder
     }
 
