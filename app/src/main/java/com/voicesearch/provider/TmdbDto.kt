@@ -8,9 +8,7 @@ import com.squareup.moshi.Json
 // @Json(name=...) is required for all fields where JSON key != Kotlin property name.
 
 data class TmdbMultiSearchResponse(
-    val page: Int = 0,
     val results: List<TmdbResultItem> = emptyList(),
-    @Json(name = "total_pages") val totalPages: Int = 0,
     @Json(name = "total_results") val totalResults: Int = 0
 )
 
@@ -29,8 +27,7 @@ data class TmdbResultItem(
     @Json(name = "poster_path") val posterPath: String? = null,
     val overview: String? = null,
     @Json(name = "genre_ids") val genreIds: List<Int>? = null,
-    @Json(name = "vote_average") val voteAverage: Double? = null,
-    val popularity: Double? = null
+    @Json(name = "vote_average") val voteAverage: Double? = null
 )
 
 data class TmdbGenreListResponse(

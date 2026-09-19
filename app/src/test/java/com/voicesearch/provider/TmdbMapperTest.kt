@@ -28,8 +28,7 @@ class TmdbMapperTest {
             posterPath = "/f89U3A6DcoOHkAQTWQrU3S4BtE.jpg",
             overview = "Компьютерный хакер...",
             genreIds = listOf(28, 12, 878),
-            voteAverage = 8.2,
-            popularity = 45.6
+            voteAverage = 8.2
         )
 
         val result = TmdbMapper.mapResultItem(item, sampleGenreCache)!!
