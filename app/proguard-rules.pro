@@ -23,3 +23,13 @@
 -keep class com.voicesearch.provider.TmdbException { *; }
 -keep class com.voicesearch.provider.TmdbException$* { *; }
 -keep class com.voicesearch.provider.TmdbMapper { *; }
+
+# Поисковый запрос пользователя не должен попадать в logcat release-сборки.
+-assumenosideeffects class android.util.Log {
+    public static int v(java.lang.String, java.lang.String);
+    public static int v(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static int d(java.lang.String, java.lang.String);
+    public static int d(java.lang.String, java.lang.String, java.lang.Throwable);
+    public static int i(java.lang.String, java.lang.String);
+    public static int i(java.lang.String, java.lang.String, java.lang.Throwable);
+}
