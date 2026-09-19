@@ -313,11 +313,9 @@ class SearchActivity : AppCompatActivity() {
         )
         for (component in candidates) {
             try {
-                val serviceInfo = pm.getServiceInfo(component, 0)
-                if (serviceInfo != null) {
-                    Log.i(TAG, "Found speech recognition service: ${component.flattenToString()}")
-                    return component
-                }
+                pm.getServiceInfo(component, 0)
+                Log.i(TAG, "Found speech recognition service: ${component.flattenToString()}")
+                return component
             } catch (_: Exception) {
                 // Not found, try next
             }
