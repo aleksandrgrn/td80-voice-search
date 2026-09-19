@@ -149,18 +149,6 @@ object IntentDispatcher {
 
     fun getAllApps(): List<TargetApp> = TARGET_APPS
 
-    fun getInstalledApps(context: Context): List<TargetApp> {
-        val pm = context.packageManager
-        return TARGET_APPS.filter { app ->
-            try {
-                pm.getPackageInfo(app.packageName, 0)
-                true
-            } catch (e: PackageManager.NameNotFoundException) {
-                false
-            }
-        }
-    }
-
     fun getSearchableApps(context: Context): List<TargetApp> {
         val pm = context.packageManager
         return TARGET_APPS.filter { app ->

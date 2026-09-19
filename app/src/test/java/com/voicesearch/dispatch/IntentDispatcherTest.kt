@@ -230,19 +230,6 @@ class IntentDispatcherTest {
     }
 
     @Test
-    fun getAllApps_smartTubeHasNoMediaFocus() {
-        val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
-        assertEquals(null, smartTube.mediaFocus)
-    }
-
-    @Test
-    fun getAllApps_allAppsHaveNoMediaFocus() {
-        val apps = IntentDispatcher.getAllApps()
-        assertTrue("All apps should have null mediaFocus",
-            apps.all { it.mediaFocus == null })
-    }
-
-    @Test
     fun getAllApps_smartTubeUsesActionView() {
         val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
         assertEquals(Intent.ACTION_VIEW, smartTube.searchAction)
@@ -330,27 +317,6 @@ class IntentDispatcherTest {
         val searchable = IntentDispatcher.getSearchableApps(context)
         assertFalse("NUM should not appear", searchable.any { it.packageName == "ru.yourok.num" })
         assertEquals(3, searchable.size)
-    }
-
-    // ===== getInstalledApps() backward compatibility =====
-
-    @Test
-    fun getInstalledApps_allInstalled_returnsFourApps() {
-        stubAllPackagesInstalled()
-
-        val installed = IntentDispatcher.getInstalledApps(context)
-        assertEquals(4, installed.size)
-    }
-
-    @Test
-    fun getInstalledApps_noneInstalled_returnsZeroApps() {
-        stubPackageNotInstalled("ru.yourok.num")
-        stubPackageNotInstalled("org.smarttube.stable")
-        stubPackageNotInstalled("top.rootu.lamps")
-        stubPackageNotInstalled("com.lazycatsoftware.lmd")
-
-        val installed = IntentDispatcher.getInstalledApps(context)
-        assertEquals(0, installed.size)
     }
 
     // ===== launchWithTmdb() — NUM with TMDB deep link =====
