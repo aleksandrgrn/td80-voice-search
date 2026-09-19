@@ -25,6 +25,7 @@ import com.voicesearch.BuildConfig
 import com.voicesearch.R
 import com.voicesearch.dispatch.IntentDispatcher
 import com.voicesearch.dispatch.LaunchResult
+import com.voicesearch.data.ApiKeyStore
 import com.voicesearch.databinding.ActivitySearchBinding
 import com.voicesearch.provider.TmdbSearchProvider
 import com.voicesearch.provider.TmdbException
@@ -42,6 +43,11 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var searchAdapter: SearchAdapter
     private lateinit var tmdbProvider: TmdbSearchProvider
+    private val keyStore by lazy {
+        ApiKeyStore(getSharedPreferences(ApiKeyStore.PREFS_NAME, MODE_PRIVATE))
+    }
+    private var apiKeyDialogVisible = false
+    private var onKeySaved: () -> Unit = {}
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
     private var pendingVoiceStart = false
@@ -70,10 +76,9 @@ class SearchActivity : AppCompatActivity() {
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // TMDB provider
-        tmdbProvider = TmdbSearchProvider(BuildConfig.TMDB_API_KEY)
-        // Жанры не зависят от запроса — тянем их, пока пользователь диктует
-        lifecycleScope.launch { tmdbProvider.prefetchGenres() }
+        // Порядок источников ключа: введённый пользователем → вшитый в сборку → диалог
+        applyKey(keyStore.get() ?: BuildConfig.TMDB_API_KEY)
+        if (!tmdbProvider.isKeyConfigured) showApiKeyDialog()
 
         // SpeechRecognizer initialization + voice button setup
         // Try standard check first, then try explicit component names for TV devices
@@ -398,6 +403,30 @@ class SearchActivity : AppCompatActivity() {
 
     // ===== Search =====
 
+    private fun applyKey(key: String) {
+        tmdbProvider = TmdbSearchProvider(key)
+        // Жанры не зависят от запроса — тянем их, пока пользователь диктует
+        lifecycleScope.launch { tmdbProvider.prefetchGenres() }
+    }
+
+    /**
+     * Один вход в диалог на оба пути: пустой ключ на старте и 401 при поиске.
+     * [onSaved] зовётся только после подтверждения ключа сервером. Если диалог
+     * уже открыт, второй не открывается, но последний [onSaved] запоминается:
+     * запрос из интента, упавший на пустом ключе, повторится после ввода.
+     */
+    private fun showApiKeyDialog(onSaved: () -> Unit = {}) {
+        onKeySaved = onSaved
+        if (apiKeyDialogVisible) return
+        apiKeyDialogVisible = true
+        ApiKeyDialog.show(this) { key ->
+            apiKeyDialogVisible = false
+            keyStore.save(key)
+            applyKey(key)
+            onKeySaved()
+        }
+    }
+
     private fun performSearch() {
         val query = binding.searchInput.text.toString().trim()
         if (query.isBlank()) return
@@ -455,6 +484,8 @@ class SearchActivity : AppCompatActivity() {
                 binding.emptyStateText.visibility = android.view.View.VISIBLE
                 binding.resultsRecyclerView.visibility = android.view.View.GONE
                 binding.providerLabel.visibility = android.view.View.GONE
+                // Ключ отклонён сервером — дать ввести новый и повторить запрос
+                showApiKeyDialog { performSearch() }
             } catch (e: Exception) {
                 Log.e(TAG, "Search failed", e)
                 resultsQuery = null
