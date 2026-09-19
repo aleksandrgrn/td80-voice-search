@@ -26,7 +26,6 @@ class TmdbSearchProvider(
 
     override val id = "tmdb"
     override val displayName = "TMDB"
-    override val type = ProviderType.CARDS
 
     private val moshi: Moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
