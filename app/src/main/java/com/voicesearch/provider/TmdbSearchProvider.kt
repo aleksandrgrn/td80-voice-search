@@ -38,7 +38,7 @@ class TmdbSearchProvider(
     private val genreMutex = Mutex()
     private var genreCache: Map<Int, String>? = null
 
-    private val isKeyConfigured: Boolean
+    val isKeyConfigured: Boolean
         get() = apiKey.isNotBlank() &&
             apiKey != "PLACEHOLDER" &&
             apiKey != "PLACEHOLDER_GET_YOUR_KEY"
@@ -70,6 +70,15 @@ class TmdbSearchProvider(
         } catch (e: Exception) {
             Log.w(TAG, "Genre prefetch failed", e)
         }
+    }
+
+    /**
+     * Проверяет ключ одним дешёвым запросом. Ничего не возвращает:
+     * успех — вернулась без исключения, иначе бросает то же, что и поиск.
+     * Кэш жанров намеренно не заполняет — провайдер тут одноразовый.
+     */
+    suspend fun validate() {
+        fetchGenreList("movie")
     }
 
     private suspend fun ensureGenreCache(): Map<Int, String> {

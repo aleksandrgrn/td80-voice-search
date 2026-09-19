@@ -347,4 +347,51 @@ class TmdbSearchProviderTest {
 
         assertEquals(0, server.requestCount)
     }
+
+    @Test
+    fun `validate returns normally on 200`() = runBlocking {
+        server.enqueue(MockResponse().setBody("""{"genres":[{"id":28,"name":"Боевик"}]}"""))
+
+        provider.validate()
+    }
+
+    @Test
+    fun `validate throws ApiKeyInvalid on 401`() = runBlocking {
+        server.enqueue(MockResponse().setResponseCode(401).setBody("""{"status_message":"Invalid API key"}"""))
+
+        try {
+            provider.validate()
+            fail("Expected TmdbException.ApiKeyInvalid")
+        } catch (e: TmdbException.ApiKeyInvalid) {
+            // Expected
+        }
+    }
+
+    @Test
+    fun `validate throws NetworkError when server is down`() = runBlocking {
+        server.shutdown()
+
+        try {
+            provider.validate()
+            fail("Expected TmdbException.NetworkError")
+        } catch (e: TmdbException.NetworkError) {
+            // Expected
+        }
+    }
+
+    @Test
+    fun `isKeyConfigured is true for a real key`() {
+        assertTrue(provider.isKeyConfigured)
+    }
+
+    @Test
+    fun `isKeyConfigured is false for PLACEHOLDER`() {
+        val placeholderProvider = TmdbSearchProvider(
+            apiKey = "PLACEHOLDER",
+            baseUrl = server.url("/3/").toString(),
+            client = OkHttpClient()
+        )
+
+        assertFalse(placeholderProvider.isKeyConfigured)
+    }
 }
