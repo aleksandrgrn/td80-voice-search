@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@+id/apiKeyField"
+        android:text="@string/api_key_message"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/apiKeyField"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="text"
+            android:maxLines="1"
+            android:fontFamily="monospace"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/apiKeyCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0/32" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/apiKeyStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <GridLayout
+        android:id="@+id/apiKeyGrid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="4" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/apiKeyBackspace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/api_key_backspace"
+            android:textSize="20sp"
+            android:minHeight="56dp" />
+
+        <Button
+            android:id="@+id/apiKeySave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/api_key_save"
+            android:enabled="false"
+            android:textSize="20sp"
+            android:minHeight="56dp" />
+    </LinearLayout>
+</LinearLayout>

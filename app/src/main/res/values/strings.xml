@@ -37,4 +37,14 @@
     <string name="launch_no_results">Дождитесь результатов поиска</string>
     <string name="launch_no_handler">%s не поддерживает поиск</string>
     <string name="launch_error">Ошибка запуска %s</string>
+
+    <!-- Ввод ключа TMDB -->
+    <string name="api_key_title">Ключ TMDB</string>
+    <string name="api_key_message">Получите бесплатный ключ на themoviedb.org и введите его здесь: 32 символа, только цифры и буквы a–f.</string>
+    <string name="api_key_counter">%1$d/32</string>
+    <string name="api_key_checking">Проверяю ключ…</string>
+    <string name="api_key_error_rejected">Сервер отклонил ключ. Проверьте и введите заново</string>
+    <string name="api_key_error_network">Нет связи с TMDB. Проверьте подключение</string>
+    <string name="api_key_save">Готово</string>
+    <string name="api_key_backspace">Стереть</string>
 </resources>
