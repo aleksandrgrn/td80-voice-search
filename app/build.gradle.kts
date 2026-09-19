@@ -47,8 +47,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "TMDB_API_KEY",
-                "\"${project.findProperty("tmdb.api.key") ?: "PLACEHOLDER"}\"")
+            // Ключ в release не вшивается никогда: пользователь вводит свой в диалоге.
+            buildConfigField("String", "TMDB_API_KEY", "\"PLACEHOLDER\"")
         }
     }
 
