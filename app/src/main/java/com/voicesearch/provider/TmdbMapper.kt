@@ -24,7 +24,6 @@ object TmdbMapper {
             posterUrl = item.posterPath?.let { "$POSTER_BASE_URL$it" },
             year = year,
             overview = item.overview,
-            providerId = "tmdb",
             metadata = buildMap {
                 put("type", "movie")
                 put("tmdbId", item.id.toString())
@@ -43,7 +42,6 @@ object TmdbMapper {
             posterUrl = item.posterPath?.let { "$POSTER_BASE_URL$it" },
             year = year,
             overview = item.overview,
-            providerId = "tmdb",
             metadata = buildMap {
                 put("type", "tv")
                 put("tmdbId", item.id.toString())

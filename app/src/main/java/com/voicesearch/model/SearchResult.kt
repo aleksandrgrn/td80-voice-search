@@ -6,6 +6,5 @@ data class SearchResult(
     val posterUrl: String?,
     val year: String?,
     val overview: String?,
-    val providerId: String,
     val metadata: Map<String, String> = emptyMap()
 )

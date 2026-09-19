@@ -39,7 +39,6 @@ class TmdbMapperTest {
         assertEquals("https://image.tmdb.org/t/p/w500/f89U3A6DcoOHkAQTWQrU3S4BtE.jpg", result.posterUrl)
         assertEquals("1999", result.year)
         assertEquals("Компьютерный хакер...", result.overview)
-        assertEquals("tmdb", result.providerId)
         assertEquals("movie", result.metadata["type"])
         assertEquals("603", result.metadata["tmdbId"])
         assertEquals("Боевик, Приключения, Фантастика", result.metadata["genre"])
