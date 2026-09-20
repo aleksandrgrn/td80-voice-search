@@ -4,9 +4,11 @@ import android.util.Log
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.voicesearch.model.SearchResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -43,19 +45,21 @@ class TmdbSearchProvider(
             apiKey != "PLACEHOLDER_GET_YOUR_KEY"
 
     override suspend fun search(query: String): List<SearchResult> {
-        if (!isKeyConfigured) {
-            Log.w(TAG, "TMDB API key is not configured — skipping search")
-            throw TmdbException.ApiKeyInvalid()
+        return withContext(Dispatchers.Default) {
+            if (!isKeyConfigured) {
+                Log.w(TAG, "TMDB API key is not configured — skipping search")
+                throw TmdbException.ApiKeyInvalid()
+            }
+
+            val cache = ensureGenreCache()
+
+            val response = searchMulti(query)
+            val results = response.results
+                .mapNotNull { item -> TmdbMapper.mapResultItem(item, cache) }
+
+            Log.d(TAG, "TMDB search '$query' → ${results.size} results (API total: ${response.totalResults})")
+            results
         }
-
-        val cache = ensureGenreCache()
-
-        val response = searchMulti(query)
-        val results = response.results
-            .mapNotNull { item -> TmdbMapper.mapResultItem(item, cache) }
-
-        Log.d(TAG, "TMDB search '$query' → ${results.size} results (API total: ${response.totalResults})")
-        return results
     }
 
     /**
@@ -63,11 +67,13 @@ class TmdbSearchProvider(
      * Безопасен для вызова из UI: не бросает и молча ничего не делает без ключа.
      */
     suspend fun prefetchGenres() {
-        if (!isKeyConfigured) return
-        try {
-            ensureGenreCache()
-        } catch (e: Exception) {
-            Log.w(TAG, "Genre prefetch failed", e)
+        withContext(Dispatchers.Default) {
+            if (!isKeyConfigured) return@withContext
+            try {
+                ensureGenreCache()
+            } catch (e: Exception) {
+                Log.w(TAG, "Genre prefetch failed", e)
+            }
         }
     }
 
@@ -77,7 +83,9 @@ class TmdbSearchProvider(
      * Кэш жанров намеренно не заполняет — провайдер тут одноразовый.
      */
     suspend fun validate() {
-        fetchGenreList("movie")
+        withContext(Dispatchers.Default) {
+            fetchGenreList("movie")
+        }
     }
 
     private suspend fun ensureGenreCache(): Map<Int, String> {
