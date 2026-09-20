@@ -27,10 +27,17 @@ android {
     }
 
     signingConfigs {
-        getByName("debug") {
-            // Используем стандартный debug keystore для release-сборки
-            // Это позволяет устанавливать release APK на устройство для тестирования
-            // Для production нужно создать отдельный keystore
+        // Путь и пароль — в local.properties (в .gitignore), сам keystore вне репозитория.
+        // Свойств нет — конфиг не создаётся, и AGP молча кладёт app-release-unsigned.apk:
+        // сборка при этом остаётся зелёной, ловит подмену ./verify-release-signing.sh.
+        val keystorePath = project.findProperty("td80.keystore.path") as String?
+        if (keystorePath != null && file(keystorePath).exists()) {
+            create("release") {
+                storeFile = file(keystorePath)
+                storePassword = project.property("td80.keystore.password") as String
+                keyAlias = project.property("td80.key.alias") as String
+                keyPassword = storePassword
+            }
         }
     }
 
@@ -42,7 +49,7 @@ android {
         }
         release {
             isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("debug")  // TODO: заменить на release keystore для production
+            signingConfig = signingConfigs.findByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
