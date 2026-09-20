@@ -101,17 +101,7 @@ class SearchActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.voice_error_not_available, Toast.LENGTH_LONG).show()
         }
         binding.voiceButton.imageTintList = ContextCompat.getColorStateList(this, R.color.state_voice_mic_tint)
-        binding.voiceButton.setOnClickListener {
-            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                maybeStartVoiceSearch()
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
-                // Пользователь уже отказывал — показать rationale перед повторным запросом
-                showMicRationaleDialog()
-            } else {
-                // Первый запрос или "Don't ask again" — запустить системный диалог
-                requestAudioPermission.launch(Manifest.permission.RECORD_AUDIO)
-            }
-        }
+        binding.voiceButton.setOnClickListener { startVoiceOrRequestPermission() }
 
         // Search input
         binding.searchInput.setOnEditorActionListener { _, actionId, _ ->
@@ -156,9 +146,9 @@ class SearchActivity : AppCompatActivity() {
         // lifecycle-aware auto-start (R4 fix)
         if (pendingVoiceStart && speechRecognizer != null) {
             pendingVoiceStart = false
-            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                maybeStartVoiceSearch()
-            }
+            // Тот же путь, что у кнопки микрофона: без общей ветки запуск с пульта
+            // при невыданном RECORD_AUDIO молча не делал ничего.
+            startVoiceOrRequestPermission()
         }
     }
 
@@ -366,6 +356,22 @@ class SearchActivity : AppCompatActivity() {
             binding.searchInput.hint = getString(R.string.voice_listening_hint)
         }
         // hint сбрасывается вызывающим кодом при выходе из listening
+    }
+
+    /**
+     * Единственная точка решения «слушать или просить разрешение».
+     * Зовётся и кнопкой микрофона, и авто-стартом по интенту с пульта.
+     */
+    private fun startVoiceOrRequestPermission() {
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            maybeStartVoiceSearch()
+        } else if (shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO)) {
+            // Пользователь уже отказывал — показать rationale перед повторным запросом
+            showMicRationaleDialog()
+        } else {
+            // Первый запрос или "Don't ask again" — запустить системный диалог
+            requestAudioPermission.launch(Manifest.permission.RECORD_AUDIO)
+        }
     }
 
     private fun showMicRationaleDialog() {
