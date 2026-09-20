@@ -83,26 +83,32 @@ class TmdbSearchProvider(
     private suspend fun ensureGenreCache(): Map<Int, String> {
         genreCache?.let { return it }
         return genreMutex.withLock {
-            genreCache ?: fetchGenres().also { if (it.isNotEmpty()) genreCache = it }
+            genreCache ?: fetchGenres().let { (genres, isComplete) ->
+                if (isComplete && genres.isNotEmpty()) genreCache = genres
+                genres
+            }
         }
     }
 
-    private suspend fun fetchGenres(): Map<Int, String> {
+    private suspend fun fetchGenres(): Pair<Map<Int, String>, Boolean> {
         val combined = mutableMapOf<Int, String>()
+        var isComplete = true
         try {
             fetchGenreList("movie").forEach { combined[it.id] = it.name }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch movie genre list", e)
+            isComplete = false
         }
         try {
             fetchGenreList("tv").forEach { combined[it.id] = it.name }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to fetch TV genre list", e)
+            isComplete = false
         }
         if (combined.isNotEmpty()) {
             Log.d(TAG, "Genre cache initialized: ${combined.size} genres")
         }
-        return combined
+        return Pair(combined, isComplete)
     }
 
     private suspend fun fetchGenreList(type: String): List<TmdbGenre> {

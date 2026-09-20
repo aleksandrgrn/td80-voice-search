@@ -226,6 +226,28 @@ class TmdbSearchProviderTest {
         assertEquals(4, server.requestCount)
     }
 
+    @Test
+    fun `incomplete genre cache is refetched on subsequent searches`() = runBlocking {
+        server.enqueue(MockResponse().setBody("""{"genres":[{"id":28,"name":"Боевик"}]}"""))
+        server.enqueue(MockResponse().setResponseCode(500))
+        server.enqueue(MockResponse().setBody("""
+            {"page":1,"results":[{"id":1,"media_type":"movie","title":"Test1","genre_ids":[28]}],"total_pages":1,"total_results":1}
+        """.trimIndent()))
+
+        val firstResults = provider.search("first")
+        assertEquals(1, firstResults.size)
+
+        enqueueGenreResponses()
+        server.enqueue(MockResponse().setBody("""
+            {"page":1,"results":[{"id":2,"media_type":"movie","title":"Test2","genre_ids":[28]}],"total_pages":1,"total_results":1}
+        """.trimIndent()))
+
+        val secondResults = provider.search("second")
+        assertEquals(1, secondResults.size)
+
+        assertEquals(6, server.requestCount)
+    }
+
     // ===== Malformed JSON =====
 
     @Test
