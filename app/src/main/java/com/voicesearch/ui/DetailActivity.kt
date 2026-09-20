@@ -92,6 +92,11 @@ class DetailActivity : AppCompatActivity() {
 
         if (!overview.isNullOrBlank()) {
             binding.detailOverview.text = overview
+            binding.detailOverview.movementMethod = android.text.method.ScrollingMovementMethod()
+        } else {
+            binding.detailOverview.isFocusable = false
+            listOf(binding.btnNum, binding.btnSmartTube, binding.btnLampa, binding.btnLazyMedia)
+                .forEach { it.nextFocusUpId = R.id.backButton }
         }
 
         // Poster
@@ -108,9 +113,13 @@ class DetailActivity : AppCompatActivity() {
 
         // Фокус на первую активную кнопку приложения: экран открывают ради запуска
         // фильма, а не «Назад». Неактивные (неустановленные) кнопки пропускаем.
-        listOf(binding.btnNum, binding.btnSmartTube, binding.btnLampa, binding.btnLazyMedia)
-            .firstOrNull { it.isEnabled }
-            ?.requestFocus()
+        val firstEnabledButton =
+            listOf(binding.btnNum, binding.btnSmartTube, binding.btnLampa, binding.btnLazyMedia)
+                .firstOrNull { it.isEnabled }
+        firstEnabledButton?.requestFocus()
+
+        // «Вниз» из описания — на ту же первую активную кнопку: NUM может быть не установлен.
+        firstEnabledButton?.let { binding.detailOverview.nextFocusDownId = it.id }
     }
 
     private fun setupAppButtons(query: String, tmdbId: String?, tmdbType: String?) {
