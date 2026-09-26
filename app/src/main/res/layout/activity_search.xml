@@ -5,10 +5,10 @@
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:background="@color/bg_primary"
-    android:paddingStart="48dp"
-    android:paddingEnd="48dp"
-    android:paddingTop="48dp"
-    android:paddingBottom="48dp">
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="24dp"
+    android:paddingBottom="24dp">
 
     <!-- ===== Top: Search bar ===== -->
     <LinearLayout
