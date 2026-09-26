@@ -1,5 +1,6 @@
 package com.voicesearch.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -26,6 +27,10 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityDetailBinding
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase.withFixedCanvas())
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

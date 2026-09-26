@@ -1,5 +1,6 @@
 package com.voicesearch.ui
 
+import android.content.Context
 import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
@@ -57,6 +58,10 @@ class SearchActivity : AppCompatActivity() {
     private var pendingVoiceStart = false
     private var searchJob: Job? = null
     private var resultsQuery: String? = null
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase.withFixedCanvas())
+    }
 
     private val requestAudioPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
