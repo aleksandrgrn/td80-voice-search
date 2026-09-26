@@ -10,7 +10,7 @@
   <a href="#сборка-из-исходников">Сборка</a>
 </p>
 
-Голосовой поиск фильмов и сериалов для Android-проектора TD80 Pro и похожих приставок без Android TV. Нажали кнопку на пульте, сказали «Во все тяжкие» — и сериал открывается в NUM или Lampa, без набора текста.
+Голосовой поиск фильмов и сериалов для Android-проектора TD80 Pro, похожих проекторов и Android TV приставок. Нажали кнопку на пульте, сказали «Во все тяжкие» — и сериал открывается в NUM или Lampa, без набора текста.
 
 <p align="center">
   <img src="./assets/readme/showcase.webp" width="100%" alt="Четыре экрана: приложение слушает голос, результаты поиска с постерами, карточка сериала с кнопками приложений, история открытых карточек">
@@ -25,7 +25,7 @@
   | Приложение | Что откроется |
   |---|---|
   | NUM | карточка этого фильма |
-  | Lampa | карточка этого фильма (Lampa запускается около 30 секунд) |
+  | Lampa | карточка этого фильма (Lampa запускается около 30 секунд). Подходят обе сборки — `top.rootu.lamps` и `ru.twicker.lampa`, кнопка сама берёт установленную |
   | SmartTube | поиск по названию на YouTube |
   | LazyMedia Deluxe | поиск по названию в её каталоге |
 
@@ -35,18 +35,18 @@
 
 ## Установка
 
-1. Скачайте `td80-voice-search-1.0.0.apk` со [страницы релизов](https://github.com/aleksandrgrn/td80-voice-search/releases/latest) и установите.
+1. Скачайте `td80-voice-search-1.1.0.apk` со [страницы релизов](https://github.com/aleksandrgrn/td80-voice-search/releases/latest) и установите.
 2. Для голоса нужен **Speech Services by Google** (распознавание речи). Без него работает поиск текстом.
 3. При первом запуске приложение попросит **ключ TMDB**: бесплатно на [themoviedb.org](https://www.themoviedb.org/settings/api), 32 символа.
 4. Нажмите кнопку голосового поиска на пульте. Если система спросит, каким приложением выполнить действие, выберите «Голосовой поиск» → «Всегда».
 
-Требуется Android 13 или новее.
+Требуется Android 9 или новее.
 
 ## Как это работает
 
 ```text
 кнопка на пульте → распознавание речи → поиск в TMDB → карточка
-                                                        ├─ NUM / Lampa: ссылка themoviedb.org → карточка фильма
+                                                        ├─ NUM / Lampa: ссылка на карточку TMDB → карточка фильма
                                                         └─ SmartTube / LazyMedia: поиск по названию
 ```
 
@@ -60,4 +60,4 @@
 
 Подпись release-сборки берётся из `local.properties` (`td80.keystore.path`, `td80.keystore.password`, `td80.key.alias`); без них Gradle соберёт неподписанный APK. Ключ TMDB в release не вшивается — пользователь вводит свой.
 
-Kotlin, minSdk 33, OkHttp + Moshi, Coil, SpeechRecognizer. Тесты: `./gradlew testDebugUnitTest`.
+Kotlin, minSdk 28, OkHttp + Moshi, Coil, SpeechRecognizer. Тесты: `./gradlew testDebugUnitTest`.
