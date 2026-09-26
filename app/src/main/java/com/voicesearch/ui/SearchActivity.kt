@@ -592,6 +592,7 @@ class SearchActivity : AppCompatActivity() {
             if (app != null && packageName in searchablePackages) {
                 button.text = app.displayName
                 button.isEnabled = true
+                button.isFocusable = true
                 button.setOnClickListener {
                     val query = binding.searchInput.text.toString().trim()
                     if (query.isBlank()) {
@@ -620,6 +621,9 @@ class SearchActivity : AppCompatActivity() {
             } else {
                 button.text = app?.displayName ?: packageName
                 button.isEnabled = false
+                // Выключенная кнопка, оставаясь focusable, обрывает цепочку nextFocusRight:
+                // фокус упирается в неё и дальше не идёт. Не-focusable Android перешагивает.
+                button.isFocusable = false
             }
         }
     }

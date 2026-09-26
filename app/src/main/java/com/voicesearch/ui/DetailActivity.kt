@@ -138,6 +138,7 @@ class DetailActivity : AppCompatActivity() {
             if (app != null && packageName in searchablePackages) {
                 button.text = app.displayName
                 button.isEnabled = true
+                button.isFocusable = true
                 button.setOnClickListener {
                     if (query.isBlank()) {
                         Toast.makeText(this, R.string.launch_empty_query, Toast.LENGTH_LONG).show()
@@ -149,6 +150,9 @@ class DetailActivity : AppCompatActivity() {
             } else {
                 button.text = app?.displayName ?: packageName
                 button.isEnabled = false
+                // Выключенная кнопка, оставаясь focusable, обрывает цепочку nextFocusRight:
+                // фокус упирается в неё и дальше не идёт. Не-focusable Android перешагивает.
+                button.isFocusable = false
             }
         }
     }
