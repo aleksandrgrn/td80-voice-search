@@ -28,8 +28,6 @@ class SearchAdapter(
         val binding = ItemResultCardBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        // Карточка тянется на высоту ряда (половина списка), ширина — в пропорции 3:4.
-        if (parent.height > 0) binding.root.layoutParams.width = parent.height * 3 / 8
         val holder = ResultViewHolder(binding, onItemClick)
         return holder
     }
