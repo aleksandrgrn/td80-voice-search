@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Say and Watch — скажите название фильма и откройте его в NUM или Lampa">
+  <img src="./assets/readme/hero.svg" width="100%" alt="say and watch — скажите название фильма и откройте его в NUM или Lampa">
 </p>
 
 <p align="center">
