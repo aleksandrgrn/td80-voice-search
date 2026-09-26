@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
+  <title id="title">TD80 Voice Search</title>
+  <desc id="desc">Голосовой поиск фильмов для Android-проектора: строка поиска с микрофоном и историей, запрос уходит в NUM, Lampa, SmartTube или LazyMedia.</desc>
+
+  <rect width="1200" height="400" rx="24" fill="#111111"/>
+
+  <g id="title-block" transform="translate(64 0)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+    <text x="0" y="96" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" letter-spacing="2" fill="#FFC107">ANDROID · ПРОЕКТОР TD80 PRO</text>
+    <text x="0" y="170" font-size="62" font-weight="700" fill="#FFFFFF">TD80 Voice</text>
+    <text x="0" y="238" font-size="62" font-weight="700" fill="#FFFFFF">Search</text>
+    <text x="0" y="292" font-size="26" fill="#D6D6D6">Скажите название фильма —</text>
+    <text x="0" y="328" font-size="26" fill="#D6D6D6">и откройте его в NUM или Lampa</text>
+    <text x="0" y="368" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#8A8A8A">Android 13+ · TMDB · пульт</text>
+  </g>
+
+  <g id="project-proof" transform="translate(600 64)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+    <!-- строка поиска: микрофон слушает, справа — «История» -->
+    <rect x="0" y="0" width="536" height="72" rx="10" fill="#2A2A2A"/>
+    <rect x="12" y="12" width="48" height="48" rx="6" fill="#FFC107"/>
+    <path transform="translate(18 18) scale(1.5)" fill="#111111" d="M12,14c1.66,0 3,-1.34 3,-3V5c0,-1.66 -1.34,-3 -3,-3S9,3.34 9,5v6C9,12.66 10.34,14 12,14zM17.3,11c0,3 -2.54,5.1 -5.3,5.1S6.7,14 6.7,11H5c0,3.41 2.72,6.23 6,6.72V21h2v-3.28c3.28,-0.49 6,-3.31 6,-6.72H17.3z"/>
+    <text x="78" y="45" font-size="24" fill="#FFFFFF">Во все тяжкие</text>
+    <path transform="translate(478 18) scale(1.5)" fill="#FFFFFF" d="M13,3c-4.97,0 -9,4.03 -9,9L1,12l3.89,3.89 0.07,0.14L9,12L6,12c0,-3.87 3.13,-7 7,-7s7,3.13 7,7 -3.13,7 -7,7c-1.93,0 -3.68,-0.79 -4.94,-2.06l-1.42,1.42C8.27,19.99 10.51,21 13,21c4.97,0 9,-4.03 9,-9s-4.03,-9 -9,-9zM12,8v5l4.28,2.54 0.72,-1.21 -3.5,-2.08L13.5,8L12,8z"/>
+
+    <!-- карточки TMDB -->
+    <text x="0" y="118" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#8A8A8A">TMDB</text>
+    <g transform="translate(0 132)">
+      <rect x="0" y="0" width="96" height="56" rx="8" fill="#332200" stroke="#CC8800" stroke-width="3"/>
+      <text x="16" y="36" font-size="20" font-weight="700" fill="#FFC107">★ 9.0</text>
+      <rect x="110" y="0" width="96" height="56" rx="8" fill="#222222"/>
+      <rect x="220" y="0" width="96" height="56" rx="8" fill="#222222"/>
+      <rect x="330" y="0" width="96" height="56" rx="8" fill="#222222"/>
+      <rect x="440" y="0" width="96" height="56" rx="8" fill="#222222"/>
+    </g>
+
+    <!-- куда уходит запрос -->
+    <path d="M48 196 V 222" stroke="#CC8800" stroke-width="3" fill="none"/>
+    <g transform="translate(0 226)">
+      <rect x="0" y="0" width="125" height="50" rx="6" fill="#444444" stroke="#CC8800" stroke-width="3"/>
+      <text x="62.5" y="33" text-anchor="middle" font-size="20" font-weight="700" fill="#FFFFFF">NUM</text>
+      <rect x="137" y="0" width="125" height="50" rx="6" fill="#2A2A2A"/>
+      <text x="199.5" y="33" text-anchor="middle" font-size="20" font-weight="700" fill="#FFFFFF">Lampa</text>
+      <rect x="274" y="0" width="125" height="50" rx="6" fill="#2A2A2A"/>
+      <text x="336.5" y="33" text-anchor="middle" font-size="20" font-weight="700" fill="#FFFFFF">SmartTube</text>
+      <rect x="411" y="0" width="125" height="50" rx="6" fill="#2A2A2A"/>
+      <text x="473.5" y="33" text-anchor="middle" font-size="20" font-weight="700" fill="#FFFFFF">LazyMedia</text>
+      <text x="131" y="80" text-anchor="middle" font-size="18" fill="#8A8A8A">карточка фильма</text>
+      <text x="405" y="80" text-anchor="middle" font-size="18" fill="#8A8A8A">поиск по названию</text>
+    </g>
+  </g>
+</svg>
