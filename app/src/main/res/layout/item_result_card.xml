@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="180dp"
-    android:layout_height="240dp"
+    android:layout_height="match_parent"
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:background="@drawable/bg_card_selector"
@@ -11,10 +11,11 @@
     <ImageView
         android:id="@+id/poster"
         android:layout_width="match_parent"
-        android:layout_height="176dp"
+        android:layout_height="match_parent"
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
+        android:layout_marginBottom="60dp"
         android:scaleType="centerCrop"
         android:contentDescription="@string/content_desc_poster" />
 
@@ -65,7 +66,7 @@
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
         android:orientation="vertical"
-        android:gravity="center"
+        android:gravity="top|center_horizontal"
         android:focusable="false"
         android:focusableInTouchMode="false">
 

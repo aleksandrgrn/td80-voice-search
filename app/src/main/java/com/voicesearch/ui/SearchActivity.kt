@@ -484,11 +484,6 @@ class SearchActivity : AppCompatActivity() {
                     }
                 }
 
-                // Dynamic provider label from provider
-                binding.providerLabel.text = tmdbProvider.displayName
-                // TODO: При добавлении нового CARDS-провайдера → переход к ConcatAdapter с секциями-заголовками
-                binding.providerLabel.visibility = android.view.View.VISIBLE
-
                 binding.searchProgressBar.visibility = android.view.View.GONE
                 if (results.isEmpty()) {
                     binding.emptyStateText.setText(R.string.no_results)
@@ -648,8 +643,12 @@ class SearchActivity : AppCompatActivity() {
             state: RecyclerView.State
         ) {
             outRect.right = spacePx
+            // Щель делим поровну между рядами: карточки тянутся на высоту ряда,
+            // и при отступе только у верхнего ряда он вышел бы ниже нижнего.
             if ((view.layoutParams as GridLayoutManager.LayoutParams).spanIndex == 0)
-                outRect.bottom = spacePx
+                outRect.bottom = spacePx / 2
+            else
+                outRect.top = spacePx / 2
         }
     }
 }
