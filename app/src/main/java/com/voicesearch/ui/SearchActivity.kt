@@ -593,8 +593,8 @@ class SearchActivity : AppCompatActivity() {
                         return@setOnClickListener
                     }
 
-                    val result = if (packageName == IntentDispatcher.PKG_NUM) {
-                        // Каталог NUM — тот же TMDB: открываем верхний результат,
+                    val result = if (packageName in IntentDispatcher.TMDB_CARD_PACKAGES) {
+                        // Каталог NUM и Лампы — тот же TMDB: открываем верхний результат,
                         // а не запускаем поиск заново.
                         val top = searchAdapter.currentList.firstOrNull()
                         if (top == null || resultsQuery != query) {

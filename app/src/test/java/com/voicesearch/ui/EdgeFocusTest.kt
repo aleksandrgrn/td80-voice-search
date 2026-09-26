@@ -60,33 +60,3 @@ class EdgeFocusTest {
         assertNull(dir(KeyEvent.KEYCODE_DPAD_CENTER, 4))
     }
 }
-
-class ScrollEdgeFocusTest {
-
-    private fun dir(keyCode: Int, canUp: Boolean = false, canDown: Boolean = false, modifiers: Boolean = false) =
-        scrollEdgeFocusDirection(keyCode, canUp, canDown, modifiers)
-
-    @Test
-    fun `down scrolls while there is text below, then leaves`() {
-        assertNull(dir(KeyEvent.KEYCODE_DPAD_DOWN, canDown = true))
-        assertEquals(View.FOCUS_DOWN, dir(KeyEvent.KEYCODE_DPAD_DOWN))
-    }
-
-    @Test
-    fun `up scrolls while there is text above, then leaves`() {
-        assertNull(dir(KeyEvent.KEYCODE_DPAD_UP, canUp = true))
-        assertEquals(View.FOCUS_UP, dir(KeyEvent.KEYCODE_DPAD_UP))
-    }
-
-    @Test
-    fun `left and right always leave`() {
-        assertEquals(View.FOCUS_LEFT, dir(KeyEvent.KEYCODE_DPAD_LEFT, canUp = true, canDown = true))
-        assertEquals(View.FOCUS_RIGHT, dir(KeyEvent.KEYCODE_DPAD_RIGHT, canUp = true, canDown = true))
-    }
-
-    @Test
-    fun `modifiers and other keys are not touched`() {
-        assertNull(dir(KeyEvent.KEYCODE_DPAD_DOWN, modifiers = true))
-        assertNull(dir(KeyEvent.KEYCODE_DPAD_CENTER))
-    }
-}

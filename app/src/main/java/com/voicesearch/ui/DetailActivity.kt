@@ -90,23 +90,9 @@ class DetailActivity : AppCompatActivity() {
             else -> binding.detailType.visibility = android.view.View.GONE
         }
 
+        // Описание без фокуса: с пульта оно только мешало ходить между «Назад» и кнопками
         if (!overview.isNullOrBlank()) {
             binding.detailOverview.text = overview
-            binding.detailOverview.movementMethod = android.text.method.ScrollingMovementMethod()
-            binding.detailOverview.setOnKeyListener { view, keyCode, event ->
-                if (event.action != android.view.KeyEvent.ACTION_DOWN) return@setOnKeyListener false
-                val direction = scrollEdgeFocusDirection(
-                    keyCode,
-                    view.canScrollVertically(-1),
-                    view.canScrollVertically(1),
-                    !event.hasNoModifiers()
-                ) ?: return@setOnKeyListener false
-                view.focusSearch(direction)?.requestFocus() ?: false
-            }
-        } else {
-            binding.detailOverview.isFocusable = false
-            listOf(binding.btnNum, binding.btnSmartTube, binding.btnLampa, binding.btnLazyMedia)
-                .forEach { it.nextFocusUpId = R.id.backButton }
         }
 
         // Poster
@@ -127,9 +113,6 @@ class DetailActivity : AppCompatActivity() {
             listOf(binding.btnNum, binding.btnSmartTube, binding.btnLampa, binding.btnLazyMedia)
                 .firstOrNull { it.isEnabled }
         firstEnabledButton?.requestFocus()
-
-        // «Вниз» из описания — на ту же первую активную кнопку: NUM может быть не установлен.
-        firstEnabledButton?.let { binding.detailOverview.nextFocusDownId = it.id }
     }
 
     private fun setupAppButtons(query: String, tmdbId: String?, tmdbType: String?) {

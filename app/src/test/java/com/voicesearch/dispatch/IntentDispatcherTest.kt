@@ -8,10 +8,13 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.net.Uri
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.Assert.assertEquals
@@ -419,14 +422,59 @@ class IntentDispatcherTest {
         assertEquals(LaunchResult.SUCCESS, result)
     }
 
+    // Каталог Лампы — тот же TMDB: карточка открывается по ссылке, как у NUM.
     @Test
-    fun launchWithTmdb_lampaIgnoresTmdb_delegatesToLaunch() {
+    fun launchWithTmdb_lampaWithTmdb_opensTmdbCard() {
         val lampa = IntentDispatcher.getAllApps().first { it.packageName == "top.rootu.lamps" }
         stubPackageInstalled(lampa.packageName)
         stubResolveActivitySuccess()
+        mockkStatic(Uri::class)
+        try {
+            every { Uri.parse(any()) } returns mockk()
 
-        val result = IntentDispatcher.launchWithTmdb(context, lampa, "Матрица", "603", "movie")
-        assertEquals(LaunchResult.SUCCESS, result)
+            val result = IntentDispatcher.launchWithTmdb(context, lampa, "Матрица", "603", "movie")
+
+            assertEquals(LaunchResult.SUCCESS, result)
+            verify { Uri.parse("https://www.themoviedb.org/movie/603") }
+        } finally {
+            unmockkStatic(Uri::class)
+        }
+    }
+
+    @Test
+    fun launchWithTmdb_smartTube_doesNotOpenTmdbCard() {
+        val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
+        stubPackageInstalled(smartTube.packageName)
+        stubResolveActivitySuccess()
+        mockkStatic(Uri::class)
+        try {
+            every { Uri.parse(any()) } returns mockk()
+
+            IntentDispatcher.launchWithTmdb(context, smartTube, "Матрица", "603", "movie")
+
+            verify(exactly = 0) { Uri.parse(match { it.startsWith("https://www.themoviedb.org/") }) }
+        } finally {
+            unmockkStatic(Uri::class)
+        }
+    }
+
+    @Test
+    fun tmdbCardPackages_areNumAndLampa() {
+        assertEquals(setOf("ru.yourok.num", "top.rootu.lamps"), IntentDispatcher.TMDB_CARD_PACKAGES)
+    }
+
+    // ===== LazyMedia — поиск только явным компонентом =====
+    // Неявный ACTION_SEARCH у LazyMedia резолвится в её ActivityTvArticle, а та падает с NPE.
+
+    @Test
+    fun lazyMedia_searchesViaSearchActivity() {
+        // Сам Intent здесь не прочитать (геттеры — заглушки), поэтому проверяется настройка;
+        // что запуск уходит в этот класс, проверено на устройстве.
+        val lazy = IntentDispatcher.getAllApps().first { it.packageName == "com.lazycatsoftware.lmd" }
+        assertEquals(
+            "com.lazycatsoftware.lazymediadeluxe.ui.tv.activities.ActivityTvSearch",
+            lazy.searchActivity
+        )
     }
 
     // ===== launchWithTmdb() — blank query =====

@@ -27,23 +27,3 @@ fun edgeFocusDirection(
         else -> null
     }
 }
-
-/**
- * То же для прокручиваемого текста (описание в карточке): стрелка вверх/вниз прокручивает,
- * пока есть куда, а на краю уводит фокус. Влево/вправо текст не прокручивается — сразу к соседу.
- */
-fun scrollEdgeFocusDirection(
-    keyCode: Int,
-    canScrollUp: Boolean,
-    canScrollDown: Boolean,
-    hasModifiers: Boolean,
-): Int? {
-    if (hasModifiers) return null
-    return when (keyCode) {
-        KeyEvent.KEYCODE_DPAD_UP -> View.FOCUS_UP.takeIf { !canScrollUp }
-        KeyEvent.KEYCODE_DPAD_DOWN -> View.FOCUS_DOWN.takeIf { !canScrollDown }
-        KeyEvent.KEYCODE_DPAD_LEFT -> View.FOCUS_LEFT
-        KeyEvent.KEYCODE_DPAD_RIGHT -> View.FOCUS_RIGHT
-        else -> null
-    }
-}

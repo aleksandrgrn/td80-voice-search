@@ -29,8 +29,13 @@ object IntentDispatcher {
         TargetApp(PKG_SMARTTUBE, Intent.ACTION_VIEW, "SmartTube",
             dataUriTemplate = "https://www.youtube.com/results?search_query={query}"),
         TargetApp(PKG_LAMPA, Intent.ACTION_SEARCH, "Lampa"),
-        TargetApp(PKG_LAZYMEDIA, Intent.ACTION_SEARCH, "LazyMediaDeluxe"),
+        // Неявный ACTION_SEARCH у LazyMedia резолвится в ActivityTvArticle, а та падает с NPE
+        TargetApp(PKG_LAZYMEDIA, Intent.ACTION_SEARCH, "LazyMediaDeluxe",
+            searchActivity = "com.lazycatsoftware.lazymediadeluxe.ui.tv.activities.ActivityTvSearch"),
     )
+
+    /** Каталог этих приложений — TMDB: по ссылке themoviedb.org они открывают карточку. */
+    val TMDB_CARD_PACKAGES = setOf(PKG_NUM, PKG_LAMPA)
 
     /** Test URI used by getSearchableApps() for NUM — NUM resolves ACTION_VIEW for TMDB URLs. */
     private const val NUM_TEST_URI = "https://www.themoviedb.org/movie/1"
@@ -49,6 +54,7 @@ object IntentDispatcher {
 
         val intent = Intent(app.searchAction).apply {
             setPackage(app.packageName)
+            app.searchActivity?.let { setClassName(app.packageName, it) }
             putExtra(SearchManager.QUERY, query)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
@@ -86,7 +92,7 @@ object IntentDispatcher {
     /**
      * Launch a target app, preferring a TMDB deep link when available.
      *
-     * For NUM: if tmdbId and tmdbType are provided, opens the specific movie/TV show
+     * For NUM and Lampa: if tmdbId and tmdbType are provided, opens the specific movie/TV show
      * via ACTION_VIEW + TMDB URI. Otherwise falls through to [launch].
      *
      * For apps with dataUriTemplate (SmartTube): delegates to [launch] which
@@ -101,8 +107,8 @@ object IntentDispatcher {
     ): LaunchResult {
         if (query.isBlank()) return LaunchResult.NO_HANDLER
 
-        // NUM with TMDB info → deep link
-        if (app.packageName == PKG_NUM && !tmdbId.isNullOrBlank() && !tmdbType.isNullOrBlank()) {
+        // NUM / Lampa with TMDB info → deep link
+        if (app.packageName in TMDB_CARD_PACKAGES && !tmdbId.isNullOrBlank() && !tmdbType.isNullOrBlank()) {
             val pm = context.packageManager
 
             try {
@@ -156,6 +162,7 @@ object IntentDispatcher {
                 pm.getPackageInfo(app.packageName, 0)
                 val intent = Intent(app.searchAction).apply {
                     setPackage(app.packageName)
+                    app.searchActivity?.let { setClassName(app.packageName, it) }
                     if (app.dataUriTemplate != null) {
                         val encodedQuery = URLEncoder.encode("test", "UTF-8")
                         val uriString = app.dataUriTemplate.replace("{query}", encodedQuery)

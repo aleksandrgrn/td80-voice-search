@@ -137,12 +137,10 @@
         android:textSize="14sp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
-        android:focusable="true"
+        android:focusable="false"
         android:background="@drawable/bg_overview_selector"
         android:scrollbars="vertical"
         android:padding="4dp"
-        android:nextFocusUp="@id/backButton"
-        android:nextFocusDown="@id/btnNum"
         app:layout_constraintTop_toBottomOf="@id/detailDuration"
         app:layout_constraintBottom_toTopOf="@id/appButtonsContainer"
         app:layout_constraintStart_toEndOf="@id/detailPoster"
@@ -179,7 +177,7 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/detailOverview"
+            android:nextFocusUp="@id/backButton"
             android:nextFocusDown="@id/backButton"
             android:nextFocusRight="@id/btnSmartTube" />
 
@@ -193,7 +191,7 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/detailOverview"
+            android:nextFocusUp="@id/backButton"
             android:nextFocusDown="@id/backButton"
             android:nextFocusLeft="@id/btnNum"
             android:nextFocusRight="@id/btnLampa" />
@@ -208,7 +206,7 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/detailOverview"
+            android:nextFocusUp="@id/backButton"
             android:nextFocusDown="@id/backButton"
             android:nextFocusLeft="@id/btnSmartTube"
             android:nextFocusRight="@id/btnLazyMedia" />
@@ -222,7 +220,7 @@
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:background="@drawable/bg_app_button_selector"
-            android:nextFocusUp="@id/detailOverview"
+            android:nextFocusUp="@id/backButton"
             android:nextFocusDown="@id/backButton"
             android:nextFocusLeft="@id/btnLampa" />
 
