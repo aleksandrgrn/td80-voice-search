@@ -87,12 +87,14 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/resultsRecyclerView"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:descendantFocusability="afterDescendants"
         app:layout_constraintTop_toBottomOf="@id/providerLabel"
         app:layout_constraintBottom_toTopOf="@id/appButtonsContainer"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintVertical_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -104,8 +106,8 @@
         android:textColor="@color/text_secondary"
         android:textSize="18sp"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@id/resultsRecyclerView"
-        app:layout_constraintBottom_toBottomOf="@id/resultsRecyclerView"
+        app:layout_constraintTop_toBottomOf="@id/providerLabel"
+        app:layout_constraintBottom_toTopOf="@id/appButtonsContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -116,8 +118,8 @@
         android:visibility="gone"
         android:indeterminateTint="@color/accent_yellow"
         android:contentDescription="@string/loading_search"
-        app:layout_constraintTop_toTopOf="@id/resultsRecyclerView"
-        app:layout_constraintBottom_toBottomOf="@id/resultsRecyclerView"
+        app:layout_constraintTop_toBottomOf="@id/providerLabel"
+        app:layout_constraintBottom_toTopOf="@id/appButtonsContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
