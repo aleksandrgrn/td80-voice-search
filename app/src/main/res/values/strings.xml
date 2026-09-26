@@ -10,6 +10,8 @@
     <string name="error_search_failed">Не удалось выполнить поиск. Проверьте подключение к сети</string>
     <string name="search_in_label">Искать в:</string>
     <string name="back_button">Назад</string>
+    <string name="history_button">История</string>
+    <string name="history_empty">История пуста</string>
     <string name="voice_listening_hint">Слушаю…</string>
     <string name="voice_processing_hint">Обработка…</string>
     <string name="voice_error_not_available">Голосовой поиск недоступен. Установите Speech Services by Google</string>

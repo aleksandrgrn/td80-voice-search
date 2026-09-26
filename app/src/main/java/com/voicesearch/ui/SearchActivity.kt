@@ -26,6 +26,7 @@ import com.voicesearch.R
 import com.voicesearch.dispatch.IntentDispatcher
 import com.voicesearch.dispatch.LaunchResult
 import com.voicesearch.data.ApiKeyStore
+import com.voicesearch.data.HistoryStore
 import com.voicesearch.databinding.ActivitySearchBinding
 import com.voicesearch.provider.TmdbSearchProvider
 import com.voicesearch.provider.TmdbException
@@ -45,6 +46,9 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var tmdbProvider: TmdbSearchProvider
     private val keyStore by lazy {
         ApiKeyStore(getSharedPreferences(ApiKeyStore.PREFS_NAME, MODE_PRIVATE))
+    }
+    private val historyStore by lazy {
+        HistoryStore(getSharedPreferences(ApiKeyStore.PREFS_NAME, MODE_PRIVATE))
     }
     private var apiKeyDialogVisible = false
     private var onKeySaved: () -> Unit = {}
@@ -102,6 +106,7 @@ class SearchActivity : AppCompatActivity() {
         }
         binding.voiceButton.imageTintList = ContextCompat.getColorStateList(this, R.color.state_voice_mic_tint)
         binding.voiceButton.setOnClickListener { startVoiceOrRequestPermission() }
+        binding.historyButton.setOnClickListener { showHistory() }
 
         // Search input
         binding.searchInput.setOnEditorActionListener { _, actionId, _ ->
@@ -503,9 +508,39 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
+    // ===== History =====
+
+    private fun showHistory() {
+        searchJob?.cancel()
+        // История — не результат текущего запроса: NUM не должен брать из неё верхнюю карточку
+        resultsQuery = null
+        binding.searchProgressBar.visibility = android.view.View.GONE
+
+        val history = historyStore.all()
+        searchAdapter.submitList(history) {
+            if (history.isNotEmpty()) {
+                binding.resultsRecyclerView.post {
+                    binding.resultsRecyclerView
+                        .findViewHolderForAdapterPosition(0)?.itemView?.requestFocus()
+                }
+            }
+        }
+        binding.providerLabel.setText(R.string.history_button)
+        binding.providerLabel.visibility = android.view.View.VISIBLE
+        if (history.isEmpty()) {
+            binding.emptyStateText.setText(R.string.history_empty)
+            binding.emptyStateText.visibility = android.view.View.VISIBLE
+            binding.resultsRecyclerView.visibility = android.view.View.GONE
+        } else {
+            binding.resultsRecyclerView.visibility = android.view.View.VISIBLE
+            binding.emptyStateText.visibility = android.view.View.GONE
+        }
+    }
+
     // ===== Result click → DetailActivity =====
 
     private fun onResultClick(result: com.voicesearch.model.SearchResult) {
+        historyStore.add(result)
         val intent = Intent(this, DetailActivity::class.java).apply {
             putExtra(DetailActivity.EXTRA_TITLE, result.title)
             putExtra(DetailActivity.EXTRA_POSTER_URL, result.posterUrl)

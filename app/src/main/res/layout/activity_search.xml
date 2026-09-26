@@ -54,7 +54,20 @@
             android:singleLine="true"
             android:imeOptions="actionSearch"
             android:inputType="text"
-            android:nextFocusLeft="@id/voiceButton" />
+            android:nextFocusLeft="@id/voiceButton"
+            android:nextFocusRight="@id/historyButton" />
+
+        <ImageButton
+            android:id="@+id/historyButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_history"
+            android:background="@drawable/bg_voice_button_selector"
+            android:contentDescription="@string/history_button"
+            android:scaleType="centerInside"
+            android:padding="8dp"
+            android:nextFocusLeft="@id/searchInput"
+            android:nextFocusRight="@id/historyButton" />
 
     </LinearLayout>
 
