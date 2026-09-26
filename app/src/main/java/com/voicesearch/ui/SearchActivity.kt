@@ -582,7 +582,8 @@ class SearchActivity : AppCompatActivity() {
         val buttonAppMap = mapOf(
             binding.btnNum to IntentDispatcher.PKG_NUM,
             binding.btnSmartTube to IntentDispatcher.PKG_SMARTTUBE,
-            binding.btnLampa to IntentDispatcher.PKG_LAMPA,
+            binding.btnLampa to (IntentDispatcher.LAMPA_PACKAGES.firstOrNull { it in searchablePackages }
+                ?: IntentDispatcher.PKG_LAMPA),
             binding.btnLazyMedia to IntentDispatcher.PKG_LAZYMEDIA,
         )
 

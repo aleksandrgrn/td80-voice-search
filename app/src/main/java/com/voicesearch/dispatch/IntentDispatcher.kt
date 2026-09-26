@@ -22,6 +22,7 @@ object IntentDispatcher {
     const val PKG_NUM = "ru.yourok.num"
     const val PKG_SMARTTUBE = "org.smarttube.stable"
     const val PKG_LAMPA = "top.rootu.lamps"
+    const val PKG_LAMPA_TWICKER = "ru.twicker.lampa"
     const val PKG_LAZYMEDIA = "com.lazycatsoftware.lmd"
 
     private val TARGET_APPS = listOf(
@@ -29,13 +30,17 @@ object IntentDispatcher {
         TargetApp(PKG_SMARTTUBE, Intent.ACTION_VIEW, "SmartTube",
             dataUriTemplate = "https://www.youtube.com/results?search_query={query}"),
         TargetApp(PKG_LAMPA, Intent.ACTION_SEARCH, "Lampa"),
+        TargetApp(PKG_LAMPA_TWICKER, Intent.ACTION_SEARCH, "Lampa"),
         // Неявный ACTION_SEARCH у LazyMedia резолвится в ActivityTvArticle, а та падает с NPE
         TargetApp(PKG_LAZYMEDIA, Intent.ACTION_SEARCH, "LazyMediaDeluxe",
             searchActivity = "com.lazycatsoftware.lazymediadeluxe.ui.tv.activities.ActivityTvSearch"),
     )
 
     /** Каталог этих приложений — TMDB: по ссылке themoviedb.org они открывают карточку. */
-    val TMDB_CARD_PACKAGES = setOf(PKG_NUM, PKG_LAMPA)
+    val TMDB_CARD_PACKAGES = setOf(PKG_NUM, PKG_LAMPA, PKG_LAMPA_TWICKER)
+
+    /** Две сборки Лампы под одной кнопкой; стоит обычно одна из них. */
+    val LAMPA_PACKAGES = listOf(PKG_LAMPA, PKG_LAMPA_TWICKER)
 
     /** Test URI used by getSearchableApps() for NUM — NUM resolves ACTION_VIEW for TMDB URLs. */
     private const val NUM_TEST_URI = "https://www.themoviedb.org/movie/1"
@@ -118,7 +123,12 @@ object IntentDispatcher {
                 return LaunchResult.NO_HANDLER
             }
 
-            val tmdbUri = Uri.parse("https://www.themoviedb.org/${tmdbType}/${tmdbId}")
+            // Сборка ru.twicker.lampa ссылок themoviedb.org не берёт — только свою схему.
+            val tmdbUri = if (app.packageName == PKG_LAMPA_TWICKER) {
+                Uri.parse("lampa://$PKG_LAMPA_TWICKER/${tmdbType}/${tmdbId}")
+            } else {
+                Uri.parse("https://www.themoviedb.org/${tmdbType}/${tmdbId}")
+            }
             val intent = Intent(Intent.ACTION_VIEW, tmdbUri).apply {
                 setPackage(app.packageName)
                 putExtra(SearchManager.QUERY, query)

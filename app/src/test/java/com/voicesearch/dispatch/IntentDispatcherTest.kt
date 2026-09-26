@@ -63,6 +63,7 @@ class IntentDispatcherTest {
         stubPackageInstalled("ru.yourok.num")
         stubPackageInstalled("org.smarttube.stable")
         stubPackageInstalled("top.rootu.lamps")
+        stubPackageInstalled("ru.twicker.lampa")
         stubPackageInstalled("com.lazycatsoftware.lmd")
     }
 
@@ -227,9 +228,9 @@ class IntentDispatcherTest {
     // ===== getAllApps() tests =====
 
     @Test
-    fun getAllApps_returnsFourApps() {
+    fun getAllApps_returnsFiveApps() {
         val apps = IntentDispatcher.getAllApps()
-        assertEquals(4, apps.size)
+        assertEquals(5, apps.size)
     }
 
     @Test
@@ -292,12 +293,12 @@ class IntentDispatcherTest {
     // ===== getSearchableApps() tests =====
 
     @Test
-    fun getSearchableApps_allResolve_returnsFourApps() {
+    fun getSearchableApps_allResolve_returnsFiveApps() {
         stubAllPackagesInstalled()
         stubResolveActivitySuccess()
 
         val searchable = IntentDispatcher.getSearchableApps(context)
-        assertEquals(4, searchable.size)
+        assertEquals(5, searchable.size)
     }
 
     @Test
@@ -314,6 +315,7 @@ class IntentDispatcherTest {
         stubPackageNotInstalled("ru.yourok.num")
         stubPackageInstalled("org.smarttube.stable")
         stubPackageInstalled("top.rootu.lamps")
+        stubPackageNotInstalled("ru.twicker.lampa")
         stubPackageInstalled("com.lazycatsoftware.lmd")
         stubResolveActivitySuccess()
 
@@ -441,6 +443,26 @@ class IntentDispatcherTest {
         }
     }
 
+    // Сборка Лампы ru.twicker.lampa ссылок themoviedb.org не берёт — только свою схему.
+    @Test
+    fun launchWithTmdb_twickerLampa_opensCardViaLampaScheme() {
+        val lampa = IntentDispatcher.getAllApps().first { it.packageName == "ru.twicker.lampa" }
+        stubPackageInstalled(lampa.packageName)
+        stubResolveActivitySuccess()
+        mockkStatic(Uri::class)
+        try {
+            every { Uri.parse(any()) } returns mockk()
+
+            val result = IntentDispatcher.launchWithTmdb(context, lampa, "Во все тяжкие", "1396", "tv")
+
+            assertEquals(LaunchResult.SUCCESS, result)
+            verify { Uri.parse("lampa://ru.twicker.lampa/tv/1396") }
+            verify(exactly = 0) { Uri.parse(match { it.startsWith("https://www.themoviedb.org/") }) }
+        } finally {
+            unmockkStatic(Uri::class)
+        }
+    }
+
     @Test
     fun launchWithTmdb_smartTube_doesNotOpenTmdbCard() {
         val smartTube = IntentDispatcher.getAllApps().first { it.packageName == "org.smarttube.stable" }
@@ -460,7 +482,7 @@ class IntentDispatcherTest {
 
     @Test
     fun tmdbCardPackages_areNumAndLampa() {
-        assertEquals(setOf("ru.yourok.num", "top.rootu.lamps"), IntentDispatcher.TMDB_CARD_PACKAGES)
+        assertEquals(setOf("ru.yourok.num", "top.rootu.lamps", "ru.twicker.lampa"), IntentDispatcher.TMDB_CARD_PACKAGES)
     }
 
     // ===== LazyMedia — поиск только явным компонентом =====

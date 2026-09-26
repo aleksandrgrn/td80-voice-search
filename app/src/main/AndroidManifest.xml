@@ -13,6 +13,7 @@
         <package android:name="ru.yourok.num" />
         <package android:name="org.smarttube.stable" />
         <package android:name="top.rootu.lamps" />
+        <package android:name="ru.twicker.lampa" />
         <package android:name="com.lazycatsoftware.lmd" />
         <package android:name="com.google.android.googlequicksearchbox" />
         <package android:name="com.google.android.tts" />
