@@ -118,6 +118,18 @@ class SearchActivity : AppCompatActivity() {
             }
         }
 
+        binding.searchInput.setOnKeyListener { input, keyCode, event ->
+            if (event.action != android.view.KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+            val direction = edgeFocusDirection(
+                keyCode,
+                binding.searchInput.selectionStart,
+                binding.searchInput.selectionEnd,
+                binding.searchInput.length(),
+                !event.hasNoModifiers()
+            ) ?: return@setOnKeyListener false
+            input.focusSearch(direction)?.requestFocus() ?: false
+        }
+
         // RecyclerView setup
         searchAdapter = SearchAdapter { result ->
             onResultClick(result)

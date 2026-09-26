@@ -93,6 +93,16 @@ class DetailActivity : AppCompatActivity() {
         if (!overview.isNullOrBlank()) {
             binding.detailOverview.text = overview
             binding.detailOverview.movementMethod = android.text.method.ScrollingMovementMethod()
+            binding.detailOverview.setOnKeyListener { view, keyCode, event ->
+                if (event.action != android.view.KeyEvent.ACTION_DOWN) return@setOnKeyListener false
+                val direction = scrollEdgeFocusDirection(
+                    keyCode,
+                    view.canScrollVertically(-1),
+                    view.canScrollVertically(1),
+                    !event.hasNoModifiers()
+                ) ?: return@setOnKeyListener false
+                view.focusSearch(direction)?.requestFocus() ?: false
+            }
         } else {
             binding.detailOverview.isFocusable = false
             listOf(binding.btnNum, binding.btnSmartTube, binding.btnLampa, binding.btnLazyMedia)
